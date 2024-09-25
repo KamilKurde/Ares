@@ -2,7 +2,7 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.gateway.*
 import dev.kord.rest.builder.interaction.ChatInputCreateBuilder
-import dev.kord.rest.builder.interaction.string
+import dev.kord.rest.builder.interaction.subCommand
 import kotlinx.coroutines.runBlocking
 import org.slf4j.MarkerFactory
 
@@ -38,12 +38,9 @@ class Bot {
 	}
 
 	private suspend fun Kord.setUpCommands() {
-		registerCommand("combat", "Shows combat status for a combat of given name") {
-			string("combat_name", "Name of combat to show status for") {
-				required = true
-				minLength = 3
-				maxLength = 20
-			}
+		registerCommand("combat", "Controls status of a combat") {
+			subCommand("start", "Starts a combat")
+			subCommand("end", "Starts a combat")
 		}
 	}
 
