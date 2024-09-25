@@ -1,12 +1,13 @@
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
+import dev.kord.core.entity.application.ApplicationCommand
 import dev.kord.gateway.*
 import dev.kord.rest.builder.interaction.ChatInputCreateBuilder
 import dev.kord.rest.builder.interaction.subCommand
 import kotlinx.coroutines.runBlocking
 import org.slf4j.MarkerFactory
 
-class Bot {
+class Bot(private val guildId: Snowflake) {
 	@OptIn(PrivilegedIntent::class)
 	suspend fun initialize(kord: Kord) {
 		val tag = MarkerFactory.getMarker("Bot#initialize")
@@ -27,14 +28,8 @@ class Bot {
 	}
 
 	private suspend fun Kord.removeOldCommands() {
-		getGlobalApplicationCommands().collect { command ->
-			command.delete()
-		}
-		guilds.collect { guild ->
-			guild.getApplicationCommands().collect { command ->
-				command.delete()
-			}
-		}
+		getGlobalApplicationCommands().collect(ApplicationCommand::delete)
+		getGuildApplicationCommands(guildId).collect(ApplicationCommand::delete)
 	}
 
 	private suspend fun Kord.setUpCommands() {
@@ -49,9 +44,6 @@ class Bot {
 		description: String,
 		builder: ChatInputCreateBuilder.() -> Unit
 	) {
-		when (val guildId = System.getenv("AresDiscordGuild").takeUnless { it.isNullOrBlank() }) {
-			null -> createGlobalChatInputCommand(name, description, builder)
-			else -> createGuildChatInputCommand(Snowflake(guildId), name, description, builder)
-		}
+		createGuildChatInputCommand(guildId, name, description, builder)
 	}
 }
