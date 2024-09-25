@@ -8,11 +8,11 @@ suspend fun main(){
 
 	val kord = Kord(discordToken)
 
-	val botInstance = Bot(kord)
+	val botInstance = Bot()
 
 	try {
-		botInstance.initialize()
+		botInstance.initialize(kord)
 	} finally {
-		botInstance.cleanUp()
+		botInstance.cleanUp(kord)
 	}
 }
