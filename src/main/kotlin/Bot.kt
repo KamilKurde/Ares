@@ -1,14 +1,16 @@
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.entity.application.ApplicationCommand
+import dev.kord.core.entity.interaction.SubCommand
 import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
 import dev.kord.core.on
-import dev.kord.rest.builder.interaction.ChatInputCreateBuilder
-import dev.kord.rest.builder.interaction.subCommand
+import dev.kord.rest.builder.interaction.*
 import kotlinx.coroutines.runBlocking
 import org.slf4j.MarkerFactory
 
 class Bot(private val guildId: Snowflake) {
+	private var combat: Combat = Combat()
+
 	suspend fun initialize(kord: Kord) {
 		val tag = MarkerFactory.getMarker("Bot#initialize")
 		logger.info(tag, "Removing old commands")
@@ -33,12 +35,36 @@ class Bot(private val guildId: Snowflake) {
 	}
 
 	private suspend fun onCommand(command: ChatInputCommandInteractionCreateEvent) {
+		val invoker = command.interaction.command
+		when {
+			invoker.rootName == "status" -> combat.status(command.interaction)
+			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "add" -> combat.add(
+				command
+					.interaction
+			)
+
+			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "end" -> combat = Combat()
+			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "start" -> combat.start(
+				command
+					.interaction
+			)
+		}
 	}
 
 	private suspend fun Kord.setUpCommands() {
 		registerCommand("combat", "Controls status of a combat") {
-			subCommand("start", "Starts a combat")
+			subCommand("add", "Adds a new target to the combat") {
+				string("target_name", "Name of the target") {
+					required = true
+				}
+				integer("target_health", "Initial and maximum HP of a target") {
+					required = true
+					maxValue = 200
+					minValue = 1
+				}
+			}
 			subCommand("end", "Starts a combat")
+			subCommand("start", "Starts a combat")
 		}
 		registerCommand("status", "Shows status of a combat") {
 
