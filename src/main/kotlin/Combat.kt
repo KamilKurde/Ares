@@ -35,16 +35,24 @@ class Combat {
 	suspend fun status(interaction: ChatInputCommandInteraction) {
 		interaction.respondPublic {
 			embed {
-				targets.forEach { _, target ->
+				targets.forEach { (_, target) ->
 					field {
 						name = target.name
 
-						val status = if (target.currentHp > 0) {
-							"ONLINE".format(color = Text.Color.Green)
-						} else {
-							"OFFLINE".format(color = Text.Color.Red)
+						val status = when {
+							target.isHidden -> "UNKNOWN".format(color = Text.Color.Yellow)
+							target.currentHp > 0 -> "ONLINE".format(color = Text.Color.Green) + " "
+							else -> "OFFLINE".format(color = Text.Color.Red)
 						}
-						value = ("status[".format() + status + "]").toString()
+						val hpStats = when {
+							target.isHidden -> "???/???".format(color = Text.Color.Yellow)
+							else -> (
+									target.currentHp.toString().padStart(3, '0') +
+											'/' +
+											target.maxHp.toString().padEnd(3, '0')
+									).format(color = if (target.currentHp > 0) Text.Color.Green else Text.Color.Red)
+						}
+						value = ("status[".format() + status + "]\thp[" + hpStats + "]").toString()
 					}
 				}
 			}
