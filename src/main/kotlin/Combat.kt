@@ -1,6 +1,9 @@
 import dev.kord.core.behavior.interaction.respondEphemeral
 import dev.kord.core.behavior.interaction.respondPublic
+import dev.kord.core.behavior.interaction.response.PublicMessageInteractionResponseBehavior
+import dev.kord.core.behavior.interaction.response.edit
 import dev.kord.core.entity.interaction.ChatInputCommandInteraction
+import dev.kord.rest.builder.message.MessageBuilder
 import dev.kord.rest.builder.message.embed
 import formatted.Text
 import formatted.format
@@ -39,8 +42,11 @@ class Combat {
 		}
 	}
 
-	suspend fun status(interaction: ChatInputCommandInteraction) {
-		interaction.respondPublic {
+	suspend fun status(
+		interaction: ChatInputCommandInteraction, originalResponse:
+		PublicMessageInteractionResponseBehavior? = null
+	) {
+		val statusEmbed: MessageBuilder.() -> Unit = {
 			embed {
 				targets.forEach { (_, target) ->
 					field {
@@ -64,6 +70,7 @@ class Combat {
 				}
 			}
 		}
+		originalResponse?.edit(statusEmbed) ?: interaction.respondPublic(statusEmbed)
 	}
 
 	suspend fun start(interaction: ChatInputCommandInteraction) {
@@ -75,7 +82,7 @@ class Combat {
 		}
 		isStarted = true
 		val usersToPing = interaction.command.mentionables["users"]?.id
-		interaction.respondPublic {
+		val response = interaction.respondPublic {
 			content = buildString {
 				usersToPing?.let {
 					append("<@${it.value}> ")
@@ -85,6 +92,10 @@ class Combat {
 				}
 				append("**COMBAT STARTED_**")
 			}
+		}
+
+		if (targets.isNotEmpty()) {
+			status(interaction, response)
 		}
 	}
 
