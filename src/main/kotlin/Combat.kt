@@ -116,6 +116,7 @@ class Combat {
 			embed {
 				targets.forEach { (_, target) ->
 					field {
+						inline = true
 						name = target.name
 
 						val status = when {
@@ -129,7 +130,7 @@ class Combat {
 							target.isHidden -> "???/???".format(color = Text.Color.Yellow)
 							else -> "${target.currentHp.toStat()}/${target.maxHp.toStat()}".format(color = if (target.currentHp > 0) Text.Color.Green else Text.Color.Red)
 						}
-						value = ("status[".format() + status + "]\thp[" + hpStats + "]").toString()
+						value = ("status[".format() + status + "]\nhp    [" + hpStats + "]").toString()
 					}
 				}
 			}
