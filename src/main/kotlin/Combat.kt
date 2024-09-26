@@ -7,11 +7,21 @@ import dev.kord.rest.builder.message.MessageBuilder
 import dev.kord.rest.builder.message.embed
 import formatted.Text
 import formatted.format
+import kotlinx.serialization.encodeToString
+import net.peanuuutz.tomlkt.*
 import org.slf4j.MarkerFactory
+import java.io.File
 
 class Combat {
 	private val tag = MarkerFactory.getMarker("Combat")
-	private val targets: MutableMap<String, Target> = HashMap(10)
+	private val targets: MutableMap<String, Target> = try {
+		Toml {
+			ignoreUnknownKeys = true
+		}.decodeFromReader<MutableMap<String, Target>>(TomlNativeReader(File(".combat.ares").reader()))
+	} catch (e: Exception) {
+		logger.info(tag, "Could not read previous combat! $e")
+		mutableMapOf()
+	}
 	private var isStarted: Boolean = false
 
 	suspend fun add(interaction: ChatInputCommandInteraction) {
@@ -106,6 +116,11 @@ class Combat {
 		interaction.respondEphemeral {
 			content = if (modified != null) "targets modified: $modified" else "target $targetName not found"
 		}
+	}
+
+	fun save() {
+		val serialized = Toml.encodeToString(targets)
+		File(".combat.ares").writeText(serialized)
 	}
 
 	suspend fun status(

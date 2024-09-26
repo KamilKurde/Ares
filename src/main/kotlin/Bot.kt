@@ -26,6 +26,8 @@ class Bot(private val guildId: Snowflake) {
 
 	fun cleanUp(kord: Kord) = runBlocking {
 		val tag = MarkerFactory.getMarker("Bot#cleanUp")
+		logger.info(tag, "Saving combat")
+		combat.save()
 		logger.info(tag, "Removing commands")
 		kord.removeOldCommands()
 	}
