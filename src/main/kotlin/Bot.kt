@@ -105,15 +105,13 @@ class Bot(private val guildId: Snowflake) {
 				}
 			}
 		}
-		registerCommand("status", "Shows status of a combat") {
-
-		}
+		registerCommand("status", "Shows status of a combat")
 	}
 
 	private suspend fun Kord.registerCommand(
 		name: String,
 		description: String,
-		builder: ChatInputCreateBuilder.() -> Unit
+		builder: ChatInputCreateBuilder.() -> Unit = {}
 	) {
 		createGuildChatInputCommand(guildId, name, description, builder)
 	}
