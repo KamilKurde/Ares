@@ -80,6 +80,9 @@ class Combat {
 				usersToPing?.let {
 					append("<@${it.value}> ")
 				}
+				settings.combatStartEmoji?.let {
+					append("$it ")
+				}
 				append("**COMBAT STARTED_**")
 			}
 		}
