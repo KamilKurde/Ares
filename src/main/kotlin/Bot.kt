@@ -1,5 +1,6 @@
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
+import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.entity.application.ApplicationCommand
 import dev.kord.core.entity.interaction.SubCommand
 import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
@@ -43,7 +44,13 @@ class Bot(private val guildId: Snowflake) {
 					.interaction
 			)
 
-			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "end" -> combat = Combat()
+			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "end" -> {
+				combat = Combat()
+				command.interaction.respondPublic {
+					content = "**COMBAT ENDED_**"
+				}
+			}
+
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "start" -> combat.start(
 				command
 					.interaction
@@ -68,7 +75,11 @@ class Bot(private val guildId: Snowflake) {
 				}
 			}
 			subCommand("end", "Starts a combat")
-			subCommand("start", "Starts a combat")
+			subCommand("start", "Starts a combat") {
+				mentionable("users", "Users to ping when combat starts") {
+					required = false
+				}
+			}
 		}
 		registerCommand("status", "Shows status of a combat") {
 

@@ -9,6 +9,7 @@ import org.slf4j.MarkerFactory
 class Combat {
 	private val tag = MarkerFactory.getMarker("Combat")
 	private val targets: MutableMap<String, Target> = HashMap(10)
+	private var isStarted: Boolean = false
 
 	suspend fun add(interaction: ChatInputCommandInteraction) {
 		val targetName = interaction.command.strings["target_name"]
@@ -66,8 +67,21 @@ class Combat {
 	}
 
 	suspend fun start(interaction: ChatInputCommandInteraction) {
+		if (isStarted) {
+			interaction.respondEphemeral {
+				content = "combat already started"
+			}
+			return
+		}
+		isStarted = true
+		val usersToPing = interaction.command.mentionables["users"]?.id
 		interaction.respondPublic {
-
+			content = buildString {
+				usersToPing?.let {
+					append("<@${it.value}> ")
+				}
+				append("**COMBAT STARTED_**")
+			}
 		}
 	}
 
