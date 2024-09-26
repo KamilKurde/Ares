@@ -43,6 +43,10 @@ class Bot(private val guildId: Snowflake) {
 				command
 					.interaction
 			)
+			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "edit" -> combat.edit(
+				command
+					.interaction
+			)
 
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "end" -> {
 				combat = Combat()
@@ -52,6 +56,11 @@ class Bot(private val guildId: Snowflake) {
 			}
 
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "start" -> combat.start(
+				command
+					.interaction
+			)
+
+			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "remove" -> combat.remove(
 				command
 					.interaction
 			)
@@ -74,10 +83,25 @@ class Bot(private val guildId: Snowflake) {
 					default = false
 				}
 			}
+			subCommand("edit", "Edits existing target") {
+				string("target_name", "Name of the target") {
+					required = true
+				}
+				integer("target_health", "Initial and maximum HP of a target") {
+					required = true
+					maxValue = settings.maxHp.toLong()
+					minValue = 1
+				}
+			}
 			subCommand("end", "Starts a combat")
 			subCommand("start", "Starts a combat") {
 				mentionable("users", "Users to ping when combat starts") {
 					required = false
+				}
+			}
+			subCommand("remove", "Removes existing target") {
+				string("target_name", "Name of the target") {
+					required = true
 				}
 			}
 		}

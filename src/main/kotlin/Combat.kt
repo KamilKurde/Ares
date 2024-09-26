@@ -42,6 +42,33 @@ class Combat {
 		}
 	}
 
+	suspend fun edit(interaction: ChatInputCommandInteraction) {
+		val targetName = interaction.command.strings["target_name"]
+		val targetHp = interaction.command.integers["target_health"]?.toInt()
+
+		if (targetName == null) {
+			interaction.respondEphemeral {
+				content = "target_name not found"
+			}
+			return
+		}
+
+		if (targetHp == null) {
+			interaction.respondEphemeral {
+				content = "target_health not found"
+			}
+			return
+		}
+
+		val modified = targets.compute(targetName) { _, target ->
+			target?.copy(currentHp = targetHp, maxHp = targetHp)
+		}
+
+		interaction.respondEphemeral {
+			content = if (modified != null) "targets modified: $modified" else "target $targetName not found"
+		}
+	}
+
 	suspend fun status(
 		interaction: ChatInputCommandInteraction, originalResponse:
 		PublicMessageInteractionResponseBehavior? = null
@@ -96,6 +123,23 @@ class Combat {
 
 		if (targets.isNotEmpty()) {
 			status(interaction, response)
+		}
+	}
+
+	suspend fun remove(interaction: ChatInputCommandInteraction) {
+		val targetName = interaction.command.strings["target_name"]
+
+		if (targetName == null) {
+			interaction.respondEphemeral {
+				content = "target_name not found"
+			}
+			return
+		}
+
+		val wasRemoved = targets.remove(targetName) != null
+
+		interaction.respondEphemeral {
+			content = if (wasRemoved) "target removed: $targetName" else "target $targetName not found"
 		}
 	}
 
