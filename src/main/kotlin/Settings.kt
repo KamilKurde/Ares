@@ -6,6 +6,7 @@ import java.io.File
 @Serializable
 data class Settings(
 	val maxHp: Int = 100,
+	val bossHpLevel: Int = 100,
 	val emojis: Emojis = Emojis()
 )
 

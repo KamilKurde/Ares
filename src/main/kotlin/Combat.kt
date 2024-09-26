@@ -133,17 +133,18 @@ class Combat {
 					field {
 						inline = true
 						name = target.name
+						val aliveColor = if (target.maxHp <= settings.bossHpLevel) Text.Color.Green else Text.Color.Pink
 
 						val status = when {
 							target.isHidden -> "UNKNOWN".format(color = Text.Color.Yellow)
-							target.currentHp > 0 -> "ONLINE_".format(color = Text.Color.Green)
+							target.currentHp > 0 -> "ONLINE_".format(color = aliveColor)
 							else -> "OFFLINE".format(color = Text.Color.Red)
 						}
 
 						fun Int.toStat() = toString().padStart(3, '0')
 						val hpStats = when {
 							target.isHidden -> "???/???".format(color = Text.Color.Yellow)
-							else -> "${target.currentHp.toStat()}/${target.maxHp.toStat()}".format(color = if (target.currentHp > 0) Text.Color.Green else Text.Color.Red)
+							else -> "${target.currentHp.toStat()}/${target.maxHp.toStat()}".format(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
 						}
 						value = ("status[".format() + status + "]\nhp    [" + hpStats + "]").toString()
 					}
