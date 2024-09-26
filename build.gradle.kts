@@ -17,6 +17,7 @@ repositories {
 dependencies {
 	implementation(libs.kord.core)
 	implementation(libs.slf4j.simple)
+	implementation(libs.serialization.toml)
 }
 
 application {

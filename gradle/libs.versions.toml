@@ -3,6 +3,7 @@ kotlin = "2.0.20"
 shadow = "8.1.1"
 kord = "0.14.0"
 slf4j = "2.0.13"
+tomlkt = "0.4.0"
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -12,3 +13,4 @@ shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 [libraries]
 kord-core = { group = "dev.kord", name  = "kord-core", version.ref = "kord" }
 slf4j-simple = { group = "org.slf4j", name  = "slf4j-simple", version.ref = "slf4j"}
+serialization-toml = { group = "net.peanuuutz.tomlkt", name = "tomlkt", version.ref = "tomlkt" }
