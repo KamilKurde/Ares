@@ -62,6 +62,10 @@ class Bot(private val guildId: Snowflake) {
 					maxValue = 200
 					minValue = 1
 				}
+				boolean("target_hidden", "Whether target's HP and status should be hidden") {
+					required = false
+					default = false
+				}
 			}
 			subCommand("end", "Starts a combat")
 			subCommand("start", "Starts a combat")

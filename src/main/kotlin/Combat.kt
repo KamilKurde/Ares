@@ -13,6 +13,7 @@ class Combat {
 	suspend fun add(interaction: ChatInputCommandInteraction) {
 		val targetName = interaction.command.strings["target_name"]
 		val targetHp = interaction.command.integers["target_health"]?.toInt()
+		val targetHidden = interaction.command.booleans["target_hidden"] ?: false
 		if (targetName == null) {
 			interaction.respondEphemeral {
 				content = "target_name not found"
@@ -25,7 +26,7 @@ class Combat {
 			}
 			return
 		}
-		targets += Target(targetName, targetHp, targetHp)
+		targets += Target(targetName, targetHp, targetHp, targetHidden)
 		interaction.respondEphemeral {
 			content = "targets added: ${targets[targetName]}".also { logger.info(tag, it) }
 		}
