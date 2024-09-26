@@ -26,8 +26,9 @@ class Combat {
 		}
 		if (targetName in targets) {
 			interaction.respondEphemeral {
-				content = "target_name=$targetName already exists"
+				content = "target_name $targetName already exists"
 			}
+			return
 		}
 
 		if (targetHp == null) {
