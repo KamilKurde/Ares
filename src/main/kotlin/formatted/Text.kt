@@ -1,7 +1,5 @@
 package formatted
 
-import formatted.Text.*
-
 @JvmInline
 value class Text private constructor(private val raw: String) {
 	companion object {
@@ -66,6 +64,6 @@ value class Text private constructor(private val raw: String) {
 }
 
 fun String.format(
-	decoration: Decoration = Decoration.Normal,
-	color: Color? = null
+	decoration: Text.Decoration = Text.Decoration.Normal,
+	color: Text.Color? = null
 ): Text = Text.from(this, decoration, color)
