@@ -8,6 +8,7 @@ import dev.kord.core.on
 import dev.kord.rest.builder.interaction.*
 import kotlinx.coroutines.runBlocking
 import org.slf4j.MarkerFactory
+import java.io.File
 
 class Bot(private val guildId: Snowflake) {
 	private var combat: Combat = Combat()
@@ -52,6 +53,7 @@ class Bot(private val guildId: Snowflake) {
 			)
 
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "end" -> {
+				File(".combat.ares").delete()
 				combat = Combat()
 				command.interaction.respondPublic {
 					content = "**COMBAT ENDED_**"

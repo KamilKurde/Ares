@@ -9,6 +9,7 @@ import formatted.Text
 import formatted.format
 import kotlinx.serialization.encodeToString
 import net.peanuuutz.tomlkt.*
+import org.slf4j.Marker
 import org.slf4j.MarkerFactory
 import java.io.File
 
@@ -25,28 +26,18 @@ class Combat {
 	private var isStarted: Boolean = false
 
 	suspend fun add(interaction: ChatInputCommandInteraction) {
-		val targetName = interaction.command.strings["target_name"]
-		val targetHp = interaction.command.integers["target_health"]?.toInt()
-		val targetHidden = interaction.command.booleans["target_hidden"] ?: false
-		if (targetName == null) {
-			interaction.respondEphemeral {
-				content = "target_name not found"
-			}
-			return
-		}
-		if (targetName in targets) {
-			interaction.respondEphemeral {
-				content = "target_name $targetName already exists"
-			}
-			return
-		}
+		val tag = MarkerFactory.getMarker("Combat#add")
 
-		if (targetHp == null) {
-			interaction.respondEphemeral {
-				content = "target_health not found"
-			}
-			return
-		}
+		val targetName =
+			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
+		val targetHp = interaction.command.integers["target_health"]?.toInt() ?: return interaction.respondError(
+			tag,
+			"target_health not found"
+		)
+		val targetHidden = interaction.command.booleans["target_hidden"] ?: false
+
+		if (targetName in targets) return interaction.respondError(tag, "target_name $targetName already exists")
+
 		targets += Target(targetName, targetHp, targetHp, targetHidden)
 		interaction.respondEphemeral {
 			content = "targets added: ${targets[targetName]}".also { logger.info(tag, it) }
@@ -54,20 +45,11 @@ class Combat {
 	}
 
 	suspend fun attack(interaction: ChatInputCommandInteraction) {
-		val targetName = interaction.command.strings["target_name"]
-		if (targetName == null) {
-			interaction.respondEphemeral {
-				content = "target_name not found"
-			}
-			return
-		}
-		val hp = interaction.command.integers["hp"]?.toInt()
-		if (hp == null) {
-			interaction.respondEphemeral {
-				content = "hp not found"
-			}
-			return
-		}
+		val tag = MarkerFactory.getMarker("Combat#attack")
+
+		val targetName =
+			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
+		val hp = interaction.command.integers["hp"]?.toInt() ?: return interaction.respondError(tag, "hp not found")
 
 		val modified = targets.compute(targetName) { _, target ->
 			target?.copy(currentHp = (target.currentHp - hp).coerceAtLeast(0))
@@ -85,29 +67,19 @@ class Combat {
 				}
 			}
 		} else {
-			interaction.respondEphemeral {
-				content = "target $targetName not found"
-			}
+			interaction.respondError(tag, "target $targetName not found")
 		}
 	}
 
 	suspend fun edit(interaction: ChatInputCommandInteraction) {
-		val targetName = interaction.command.strings["target_name"]
-		val targetHp = interaction.command.integers["target_health"]?.toInt()
+		val tag = MarkerFactory.getMarker("Combat#edit")
 
-		if (targetName == null) {
-			interaction.respondEphemeral {
-				content = "target_name not found"
-			}
-			return
-		}
-
-		if (targetHp == null) {
-			interaction.respondEphemeral {
-				content = "target_health not found"
-			}
-			return
-		}
+		val targetName =
+			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
+		val targetHp = interaction.command.integers["target_health"]?.toInt() ?: return interaction.respondError(
+			tag,
+			"target_health not found"
+		)
 
 		val modified = targets.compute(targetName) { _, target ->
 			target?.copy(currentHp = targetHp, maxHp = targetHp)
@@ -127,6 +99,12 @@ class Combat {
 		interaction: ChatInputCommandInteraction,
 		originalResponse: PublicMessageInteractionResponseBehavior? = null
 	) {
+		if (targets.isEmpty()) {
+			interaction.respondEphemeral {
+				content = "There are no targets"
+			}
+			return
+		}
 		val statusEmbed: MessageBuilder.() -> Unit = {
 			embed {
 				targets.forEach { (_, target) ->
@@ -155,12 +133,10 @@ class Combat {
 	}
 
 	suspend fun start(interaction: ChatInputCommandInteraction) {
-		if (isStarted) {
-			interaction.respondEphemeral {
-				content = "combat already started"
-			}
-			return
-		}
+		val tag = MarkerFactory.getMarker("Combat#start")
+
+		if (isStarted) return interaction.respondError(tag, "combat already started")
+
 		isStarted = true
 		val usersToPing = interaction.command.mentionables["users"]?.id
 		val response = interaction.respondPublic {
@@ -181,14 +157,10 @@ class Combat {
 	}
 
 	suspend fun remove(interaction: ChatInputCommandInteraction) {
-		val targetName = interaction.command.strings["target_name"]
+		val tag = MarkerFactory.getMarker("Combat#remove")
 
-		if (targetName == null) {
-			interaction.respondEphemeral {
-				content = "target_name not found"
-			}
-			return
-		}
+		val targetName =
+			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
 
 		val wasRemoved = targets.remove(targetName) != null
 
@@ -198,4 +170,11 @@ class Combat {
 	}
 
 	private operator fun MutableMap<String, Target>.plusAssign(target: Target) = plusAssign(target.name to target)
+
+	private suspend fun ChatInputCommandInteraction.respondError(tag: Marker, description: String) {
+		logger.error(tag, description)
+		respondEphemeral {
+			content = description
+		}
+	}
 }
