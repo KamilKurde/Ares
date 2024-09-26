@@ -84,13 +84,11 @@ class Combat {
 							target.currentHp > 0 -> "ONLINE_".format(color = Text.Color.Green)
 							else -> "OFFLINE".format(color = Text.Color.Red)
 						}
+
+						fun Int.toStat() = toString().padStart(3, '0')
 						val hpStats = when {
 							target.isHidden -> "???/???".format(color = Text.Color.Yellow)
-							else -> (
-									target.currentHp.toString().padStart(3, '0') +
-											'/' +
-											target.maxHp.toString().padEnd(3, '0')
-									).format(color = if (target.currentHp > 0) Text.Color.Green else Text.Color.Red)
+							else -> "${target.currentHp.toStat()}/${target.maxHp.toStat()}".format(color = if (target.currentHp > 0) Text.Color.Green else Text.Color.Red)
 						}
 						value = ("status[".format() + status + "]\thp[" + hpStats + "]").toString()
 					}
