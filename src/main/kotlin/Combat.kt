@@ -108,8 +108,8 @@ class Combat {
 	}
 
 	suspend fun status(
-		interaction: ChatInputCommandInteraction, originalResponse:
-		PublicMessageInteractionResponseBehavior? = null
+		interaction: ChatInputCommandInteraction,
+		originalResponse: PublicMessageInteractionResponseBehavior? = null
 	) {
 		val statusEmbed: MessageBuilder.() -> Unit = {
 			embed {
