@@ -42,6 +42,44 @@ class Combat {
 		}
 	}
 
+	suspend fun attack(interaction: ChatInputCommandInteraction) {
+		val targetName = interaction.command.strings["target_name"]
+		if (targetName == null) {
+			interaction.respondEphemeral {
+				content = "target_name not found"
+			}
+			return
+		}
+		val hp = interaction.command.integers["hp"]?.toInt()
+		if (hp == null) {
+			interaction.respondEphemeral {
+				content = "hp not found"
+			}
+			return
+		}
+
+		val modified = targets.compute(targetName) { _, target ->
+			target?.copy(currentHp = (target.currentHp - hp).coerceAtLeast(0))
+		}
+
+		if (modified != null) {
+			interaction.respondPublic {
+				content = buildString {
+					append("<@${interaction.user.id.value}> delt $hp damage to **$targetName** ")
+					if (modified.currentHp != 0) {
+						append("hp[${modified.currentHp}/${modified.maxHp}] remaining ${settings.emojis.attack}")
+					} else {
+						append("target eliminated ${settings.emojis.kill}")
+					}
+				}
+			}
+		} else {
+			interaction.respondEphemeral {
+				content = "target $targetName not found"
+			}
+		}
+	}
+
 	suspend fun edit(interaction: ChatInputCommandInteraction) {
 		val targetName = interaction.command.strings["target_name"]
 		val targetHp = interaction.command.integers["target_health"]?.toInt()
@@ -112,7 +150,7 @@ class Combat {
 				usersToPing?.let {
 					append("<@${it.value}> ")
 				}
-				settings.combatStartEmoji?.let {
+				settings.emojis.combatStart?.let {
 					append("$it ")
 				}
 				append("**COMBAT STARTED_**")

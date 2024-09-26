@@ -38,6 +38,7 @@ class Bot(private val guildId: Snowflake) {
 	private suspend fun onCommand(command: ChatInputCommandInteractionCreateEvent) {
 		val invoker = command.interaction.command
 		when {
+			invoker.rootName == "attack" -> combat.attack(command.interaction)
 			invoker.rootName == "status" -> combat.status(command.interaction)
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "add" -> combat.add(
 				command
@@ -68,6 +69,16 @@ class Bot(private val guildId: Snowflake) {
 	}
 
 	private suspend fun Kord.setUpCommands() {
+		registerCommand("attack", "Damages target by given HP") {
+			string("target_name", "Name of the target") {
+				required = true
+			}
+			integer("hp", "HP to deduct from target") {
+				required = true
+				minValue = 1
+				maxValue = 100
+			}
+		}
 		registerCommand("combat", "Controls status of a combat") {
 			subCommand("add", "Adds a new target to the combat") {
 				string("target_name", "Name of the target") {
