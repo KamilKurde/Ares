@@ -47,7 +47,7 @@ class Combat {
 
 						val status = when {
 							target.isHidden -> "UNKNOWN".format(color = Text.Color.Yellow)
-							target.currentHp > 0 -> "ONLINE".format(color = Text.Color.Green) + " "
+							target.currentHp > 0 -> "ONLINE_".format(color = Text.Color.Green)
 							else -> "OFFLINE".format(color = Text.Color.Red)
 						}
 						val hpStats = when {
