@@ -20,6 +20,12 @@ class Combat {
 			}
 			return
 		}
+		if (targetName in targets) {
+			interaction.respondEphemeral {
+				content = "target_name=$targetName already exists"
+			}
+		}
+
 		if (targetHp == null) {
 			interaction.respondEphemeral {
 				content = "target_health not found"
