@@ -66,7 +66,7 @@ class Bot(private val guildId: Snowflake) {
 				}
 				integer("target_health", "Initial and maximum HP of a target") {
 					required = true
-					maxValue = 200
+					maxValue = settings.maxHp.toLong()
 					minValue = 1
 				}
 				boolean("target_hidden", "Whether target's HP and status should be hidden") {

@@ -6,6 +6,7 @@ import java.io.File
 @Serializable
 data class Settings(
 	val combatStartEmoji: String? = null,
+	val maxHp: Int = 100,
 )
 
 val settings = try {
