@@ -26,6 +26,7 @@ class Combat {
 		mutableMapOf()
 	}
 	private var onTargetsChange: suspend () -> Unit = {}
+	private var footerImage: String? = null
 	private var isStarted: Boolean = false
 
 	suspend fun add(interaction: ChatInputCommandInteraction) {
@@ -223,6 +224,8 @@ class Combat {
 							("status[".format() + status + "]\nhp    [" + hpStats + "]\nap    [" + apStats + "]").toString()
 					}
 				}
+
+				image = footerImage
 			}
 		}
 		originalResponse?.edit(statusEmbed) ?: interaction.respondPublic(statusEmbed)
@@ -234,6 +237,8 @@ class Combat {
 		if (isStarted) return interaction.respondError(tag, "combat already started")
 
 		isStarted = true
+		footerImage = interaction.command.attachments.values.firstOrNull { it.isImage }?.url
+
 		val usersToPing = interaction.command.mentionables["users"]?.id
 		val response = interaction.respondPublic {
 			content = buildString {

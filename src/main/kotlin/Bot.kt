@@ -162,6 +162,9 @@ class Bot(private val guildId: Snowflake) {
 			mentionable("users", "Users to ping when combat starts") {
 				required = false
 			}
+			attachment("image", "Image to be used in status responses") {
+				required = false
+			}
 		}
 		subCommand("remove", "Removes existing target") {
 			string("target_name", "Name of the target") {
