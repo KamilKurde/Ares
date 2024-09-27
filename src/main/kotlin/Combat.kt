@@ -55,12 +55,10 @@ class Combat {
 
 		val targetName =
 			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
-		targets[targetName]?.let {
-			if (it.currentHp <= 0) return interaction.respondError(
-				tag,
-				"target_name must point to a living target"
-			)
-		}
+		val target = targets[targetName]?.takeUnless { it.currentHp <= 0 } ?: return interaction.respondError(
+			tag,
+			"target_name must point to a living target"
+		)
 		val damage = interaction.command.integers["damage"]?.toInt()
 		val dice = interaction.command.integers["roll"]?.toInt()
 
@@ -72,34 +70,40 @@ class Combat {
 
 		val rolled = dice?.let(::roll)
 		val delt = damage ?: rolled?.sum() ?: throw IllegalStateException("Space particles detected")
+		val actuallyDelt = delt - target.currentArmor
 
-		val modified = targets.compute(targetName) { _, target ->
-			target?.copy(currentHp = (target.currentHp - delt).coerceAtLeast(0))
-		}
+		val modified = target.copy(
+			currentHp = (target.currentHp - actuallyDelt.coerceAtLeast(0)).coerceAtLeast(0),
+			currentArmor = if (actuallyDelt >= 0) target.currentArmor - 1 else target.currentArmor
+		).also { targets[targetName] = it }
 
-		if (modified != null) {
-			interaction.respondPublic {
-				content = buildString {
-					append("<@${interaction.user.id.value}> delt")
-					val wasCritical = (rolled?.count { it == 6 } ?: 0) >= 2
-					if (wasCritical) {
-						append(" critical")
+		interaction.respondPublic {
+			content = buildString {
+				append("<@${interaction.user.id.value}> delt")
+				val wasCritical = (rolled?.count { it == 6 } ?: 0) >= 2
+				if (wasCritical) {
+					append(" critical")
+				}
+				if (rolled != null) {
+					append(rolled.joinToString(separator = "+", prefix = " (", postfix = ")"))
+				}
+				append(" **$actuallyDelt** damage")
+				if (actuallyDelt != delt) {
+					append(" reduced by ${target.currentArmor} armor")
+				}
+				append(" to **$targetName** ")
+				if (modified.currentHp != 0) {
+					val currentHpText = modified.currentHp.toString().takeUnless { modified.isHidden } ?: "???"
+					val maxHpText = modified.maxHp.toString().takeUnless { modified.isHidden } ?: "???"
+					append("hp[$currentHpText/${maxHpText}]")
+					if (modified.currentArmor != 0) {
+						append(" ap[${modified.currentArmor}/${modified.maxArmor}]")
 					}
-					if (rolled != null) {
-						append(rolled.joinToString(separator = "+", prefix = " (", postfix = ")"))
-					}
-					append(" **$delt** damage to **$targetName** ")
-					if (modified.currentHp != 0) {
-						val currentHpText = modified.currentHp.toString().takeUnless { modified.isHidden } ?: "???"
-						val maxHpText = modified.maxHp.toString().takeUnless { modified.isHidden } ?: "???"
-						append("hp[$currentHpText/${maxHpText}] remaining ${settings.emojis.attack}")
-					} else {
-						append("target eliminated ${settings.emojis.kill}")
-					}
+					append(" remaining ${settings.emojis.attack}")
+				} else {
+					append("target eliminated ${settings.emojis.kill}")
 				}
 			}
-		} else {
-			interaction.respondError(tag, "target $targetName not found")
 		}
 	}
 
