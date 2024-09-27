@@ -177,8 +177,8 @@ class Combat {
 						inline = true
 						name = targetName
 						val aliveColor = when {
-							target.maxHp >= settings.bossHpLevel -> Text.Color.Pink
 							target.isFriendly -> Text.Color.Blue
+							target.maxHp >= settings.bossHpLevel -> Text.Color.Pink
 							else -> Text.Color.Green
 						}
 
