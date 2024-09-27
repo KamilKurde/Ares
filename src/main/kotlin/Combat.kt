@@ -88,7 +88,9 @@ class Combat {
 					}
 					append(" $delt damage to **$targetName** ")
 					if (modified.currentHp != 0) {
-						append("hp[${modified.currentHp}/${modified.maxHp}] remaining ${settings.emojis.attack}")
+						val currentHpText = modified.currentHp.toString().takeUnless { modified.isHidden } ?: "???"
+						val maxHpText = modified.maxHp.toString().takeUnless { modified.isHidden } ?: "???"
+						append("hp[$currentHpText/${maxHpText}] remaining ${settings.emojis.attack}")
 					} else {
 						append("target eliminated ${settings.emojis.kill}")
 					}
@@ -146,8 +148,6 @@ class Combat {
 							target.currentHp > 0 -> "ONLINE_".format(color = aliveColor)
 							else -> "OFFLINE".format(color = Text.Color.Red)
 						}
-
-						fun Int.toStat() = toString().padStart(3, '0')
 						val hpStats = when {
 							target.isHidden -> "???/???".format(color = Text.Color.Yellow)
 							else -> "${target.currentHp.toStat()}/${target.maxHp.toStat()}".format(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
@@ -215,4 +215,6 @@ class Combat {
 	}
 
 	private fun roll(dice: Int) = List(dice) { Random.nextInt(1..6) }
+
+	private fun Int.toStat() = toString().padStart(3, '0')
 }
