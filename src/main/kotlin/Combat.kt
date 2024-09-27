@@ -37,12 +37,13 @@ class Combat {
 			tag,
 			"target_health not found"
 		)
+		val targetArmor = interaction.command.integers["target_armor"]?.toInt() ?: 0
 		val targetHidden = interaction.command.booleans["target_hidden"] ?: false
 		val targetFriendly = interaction.command.booleans["target_friendly"] ?: false
 
 		if (targetName in targets) return interaction.respondError(tag, "target_name $targetName already exists")
 
-		targets += Target(targetName, targetHp, targetHp, targetHidden, targetFriendly)
+		targets += Target(targetName, targetHp, targetHp, targetArmor, targetArmor, targetHidden, targetFriendly)
 		onTargetsChange()
 		interaction.respondEphemeral {
 			content = "targets added: ${targets[targetName]}".also { logger.info(tag, it) }
@@ -108,18 +109,22 @@ class Combat {
 		val targetName =
 			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
 		val targetHp = interaction.command.integers["target_health"]?.toInt()
+		val targetArmor = interaction.command.integers["target_armor"]?.toInt()
 		val targetHidden = interaction.command.booleans["target_hidden"]
 		val targetFriendly = interaction.command.booleans["target_friendly"]
 
-		if (targetHp == null && targetHidden == null && targetFriendly == null) return interaction.respondError(
-			tag,
-			"Either target_health, target_hidden or target_friendly has to be specified"
-		)
+		if (targetHp == null && targetArmor == null && targetHidden == null && targetFriendly == null)
+			return interaction.respondError(
+				tag,
+				"Either target_health, target_armor, target_hidden or target_friendly has to be specified"
+			)
 
 		val modified = targets.compute(targetName) { _, target ->
 			target?.copy(
 				currentHp = targetHp ?: target.currentHp,
 				maxHp = targetHp ?: target.maxHp,
+				currentArmor = targetArmor ?: target.currentArmor,
+				maxArmor = targetArmor ?: target.maxArmor,
 				isHidden = targetHidden ?: target.isHidden,
 				isFriendly = targetFriendly ?: target.isFriendly
 			)
@@ -166,7 +171,12 @@ class Combat {
 							target.isHidden -> "???/???".format(color = Text.Color.Yellow)
 							else -> "${target.currentHp.toStat()}/${target.maxHp.toStat()}".format(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
 						}
-						value = ("status[".format() + status + "]\nhp    [" + hpStats + "]").toString()
+						val apStats = when {
+							target.isHidden -> "???/???".format(color = Text.Color.Yellow)
+							else -> "${target.currentArmor.toStat()}/${target.maxArmor.toStat()}".format(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
+						}
+						value =
+							("status[".format() + status + "]\nhp    [" + hpStats + "]\nap    [" + apStats + "]").toString()
 					}
 				}
 			}

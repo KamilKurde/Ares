@@ -114,6 +114,11 @@ class Bot(private val guildId: Snowflake) {
 				maxValue = settings.maxHp.toLong()
 				minValue = 1
 			}
+			integer("target_armor", "Initial armor of a target") {
+				required = false
+				minValue = 0
+				maxValue = 20
+			}
 			boolean("target_hidden", "Whether target's HP and status should be hidden") {
 				required = false
 				default = false
@@ -132,6 +137,11 @@ class Bot(private val guildId: Snowflake) {
 				required = false
 				maxValue = settings.maxHp.toLong()
 				minValue = 1
+			}
+			integer("target_armor", "Initial armor of a target") {
+				required = false
+				minValue = 0
+				maxValue = 20
 			}
 			boolean("target_hidden", "Whether target's HP and status should be hidden") {
 				required = false
