@@ -79,7 +79,15 @@ class Combat {
 
 		interaction.respondPublic {
 			content = buildString {
-				append("<@${interaction.user.id.value}> delt")
+				append("<@${interaction.user.id.value}> ")
+				append(
+					when {
+						actuallyDelt > 0 -> "delt"
+						actuallyDelt == 0 -> "blocked incoming"
+						else -> "neglected incoming"
+					}
+				)
+
 				val wasCritical = (rolled?.count { it == 6 } ?: 0) >= 2
 				if (wasCritical) {
 					append(" critical")
@@ -87,21 +95,29 @@ class Combat {
 				if (rolled != null) {
 					append(rolled.joinToString(separator = "+", prefix = " (", postfix = ")"))
 				}
-				append(" **$actuallyDelt** damage")
-				if (actuallyDelt != delt) {
-					append(" reduced by ${target.currentArmor} armor")
-				}
-				append(" to **$targetName** ")
-				if (modified.currentHp != 0) {
-					val currentHpText = modified.currentHp.toString().takeUnless { modified.isHidden } ?: "???"
-					val maxHpText = modified.maxHp.toString().takeUnless { modified.isHidden } ?: "???"
-					append("hp[$currentHpText/${maxHpText}]")
-					if (modified.currentArmor != 0) {
-						append(" ap[${modified.currentArmor}/${modified.maxArmor}]")
+
+				when {
+					actuallyDelt > 0 -> {
+						append(" **$actuallyDelt** damage")
+						if (actuallyDelt != delt) {
+							append(" reduced by ${target.currentArmor} armor")
+						}
+						append(" to **$targetName** ")
+						if (modified.currentHp != 0) {
+							val currentHpText = modified.currentHp.toString().takeUnless { modified.isHidden } ?: "???"
+							val maxHpText = modified.maxHp.toString().takeUnless { modified.isHidden } ?: "???"
+							append("hp[$currentHpText/${maxHpText}]")
+							if (modified.currentArmor != 0) {
+								append(" ap[${modified.currentArmor}/${modified.maxArmor}]")
+							}
+							append(" remaining ${settings.emojis.attack}")
+						} else {
+							append("target eliminated ${settings.emojis.kill}")
+						}
 					}
-					append(" remaining ${settings.emojis.attack}")
-				} else {
-					append("target eliminated ${settings.emojis.kill}")
+
+					actuallyDelt < 0 -> append(" **$delt** damage by the ${target.currentArmor} ap")
+					else -> append(" **$delt** damage by the ${target.currentArmor} ap, the ap is reduced by 1")
 				}
 			}
 		}
