@@ -118,6 +118,10 @@ class Bot(private val guildId: Snowflake) {
 				required = false
 				default = false
 			}
+			boolean("target_friendly", "Whether target is considered friendly") {
+				required = false
+				default = false
+			}
 		}
 		subCommand("edit", "Edits existing target") {
 			string("target_name", "Name of the target") {

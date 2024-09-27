@@ -38,10 +38,11 @@ class Combat {
 			"target_health not found"
 		)
 		val targetHidden = interaction.command.booleans["target_hidden"] ?: false
+		val targetFriendly = interaction.command.booleans["target_friendly"] ?: false
 
 		if (targetName in targets) return interaction.respondError(tag, "target_name $targetName already exists")
 
-		targets += Target(targetName, targetHp, targetHp, targetHidden)
+		targets += Target(targetName, targetHp, targetHp, targetHidden, targetFriendly)
 		onTargetsChange()
 		interaction.respondEphemeral {
 			content = "targets added: ${targets[targetName]}".also { logger.info(tag, it) }
@@ -141,7 +142,11 @@ class Combat {
 					field {
 						inline = true
 						name = target.name
-						val aliveColor = if (target.maxHp <= settings.bossHpLevel) Text.Color.Green else Text.Color.Pink
+						val aliveColor = when {
+							target.maxHp >= settings.bossHpLevel -> Text.Color.Pink
+							target.isFriendly -> Text.Color.Blue
+							else -> Text.Color.Green
+						}
 
 						val status = when {
 							target.isHidden -> "UNKNOWN".format(color = Text.Color.Yellow)
