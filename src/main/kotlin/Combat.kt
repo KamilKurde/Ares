@@ -43,7 +43,7 @@ class Combat {
 
 		if (targetName in targets) return interaction.respondError(tag, "target_name $targetName already exists")
 
-		targets += Target(targetName, targetHp, targetHp, targetArmor, targetArmor, targetHidden, targetFriendly)
+		targets[targetName] = Target(targetHp, targetHp, targetArmor, targetArmor, targetHidden, targetFriendly)
 		onTargetsChange()
 		interaction.respondEphemeral {
 			content = "targets added: ${targets[targetName]}".also { logger.info(tag, it) }
@@ -152,10 +152,10 @@ class Combat {
 		}
 		val statusEmbed: MessageBuilder.() -> Unit = {
 			embed {
-				targets.forEach { (_, target) ->
+				targets.forEach { (targetName, target) ->
 					field {
 						inline = true
-						name = target.name
+						name = targetName
 						val aliveColor = when {
 							target.maxHp >= settings.bossHpLevel -> Text.Color.Pink
 							target.isFriendly -> Text.Color.Blue
@@ -228,8 +228,6 @@ class Combat {
 		}
 		onTargetsChange()
 	}
-
-	private operator fun MutableMap<String, Target>.plusAssign(target: Target) = plusAssign(target.name to target)
 
 	private suspend fun ChatInputCommandInteraction.respondError(tag: Marker, description: String) {
 		logger.error(tag, description)
