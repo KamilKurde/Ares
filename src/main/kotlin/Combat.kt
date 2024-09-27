@@ -107,13 +107,22 @@ class Combat {
 
 		val targetName =
 			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
-		val targetHp = interaction.command.integers["target_health"]?.toInt() ?: return interaction.respondError(
+		val targetHp = interaction.command.integers["target_health"]?.toInt()
+		val targetHidden = interaction.command.booleans["target_hidden"]
+		val targetFriendly = interaction.command.booleans["target_friendly"]
+
+		if (targetHp == null && targetHidden == null && targetFriendly == null) return interaction.respondError(
 			tag,
-			"target_health not found"
+			"Either target_health, target_hidden or target_friendly has to be specified"
 		)
 
 		val modified = targets.compute(targetName) { _, target ->
-			target?.copy(currentHp = targetHp, maxHp = targetHp)
+			target?.copy(
+				currentHp = targetHp ?: target.currentHp,
+				maxHp = targetHp ?: target.maxHp,
+				isHidden = targetHidden ?: target.isHidden,
+				isFriendly = targetFriendly ?: target.isFriendly
+			)
 		}
 
 		interaction.respondEphemeral {

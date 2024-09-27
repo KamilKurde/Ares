@@ -129,9 +129,15 @@ class Bot(private val guildId: Snowflake) {
 				setAllowedChoices(targets)
 			}
 			integer("target_health", "Initial and maximum HP of a target") {
-				required = true
+				required = false
 				maxValue = settings.maxHp.toLong()
 				minValue = 1
+			}
+			boolean("target_hidden", "Whether target's HP and status should be hidden") {
+				required = false
+			}
+			boolean("target_friendly", "Whether target is considered friendly") {
+				required = false
 			}
 		}
 		subCommand("end", "Starts a combat")
