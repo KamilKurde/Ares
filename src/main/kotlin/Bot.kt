@@ -1,4 +1,6 @@
+import dev.kord.common.entity.Choice
 import dev.kord.common.entity.Snowflake
+import dev.kord.common.entity.optional.Optional
 import dev.kord.core.Kord
 import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.entity.application.ApplicationCommand
@@ -52,6 +54,8 @@ class Bot(private val guildId: Snowflake) {
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "end" -> {
 				File(".combat.ares").delete()
 				combat = Combat()
+				command.kord.removeOldCommands()
+				command.kord.setUpCommands()
 				command.interaction.respondPublic {
 					content = "**COMBAT ENDED_**"
 				}
@@ -66,61 +70,82 @@ class Bot(private val guildId: Snowflake) {
 	}
 
 	private suspend fun Kord.setUpCommands() {
-		registerCommand("attack", "Damages target by given HP") {
-			string("target_name", "Name of the target") {
-				required = true
-			}
-			integer("hp", "HP to deduct from target") {
-				required = true
-				minValue = 1
-				maxValue = 100
-			}
+		val attackCommand = registerCommand("attack", "Damages target by given HP") {
+			attackCommandOptions(emptyList())
 		}
-		registerCommand("combat", "Controls status of a combat") {
-			subCommand("add", "Adds a new target to the combat") {
-				string("target_name", "Name of the target") {
-					required = true
-				}
-				integer("target_health", "Initial and maximum HP of a target") {
-					required = true
-					maxValue = settings.maxHp.toLong()
-					minValue = 1
-				}
-				boolean("target_hidden", "Whether target's HP and status should be hidden") {
-					required = false
-					default = false
-				}
+		val combatCommand = registerCommand("combat", "Controls status of a combat") {
+			combatCommandOptions(emptyList())
+		}
+		combat.registerOnTargetChange {
+			attackCommand.edit {
+				attackCommandOptions(it)
 			}
-			subCommand("edit", "Edits existing target") {
-				string("target_name", "Name of the target") {
-					required = true
-				}
-				integer("target_health", "Initial and maximum HP of a target") {
-					required = true
-					maxValue = settings.maxHp.toLong()
-					minValue = 1
-				}
-			}
-			subCommand("end", "Starts a combat")
-			subCommand("start", "Starts a combat") {
-				mentionable("users", "Users to ping when combat starts") {
-					required = false
-				}
-			}
-			subCommand("remove", "Removes existing target") {
-				string("target_name", "Name of the target") {
-					required = true
-				}
+			combatCommand.edit {
+				combatCommandOptions(it)
 			}
 		}
 		registerCommand("status", "Shows status of a combat")
+	}
+
+	private fun RootInputChatBuilder.attackCommandOptions(targets: List<String>) {
+		string("target_name", "Name of the target") {
+			required = true
+			setAllowedChoices(targets)
+		}
+		integer("hp", "HP to deduct from target") {
+			required = true
+			minValue = 1
+			maxValue = 100
+		}
+	}
+
+	private fun RootInputChatBuilder.combatCommandOptions(targets: List<String>) {
+		subCommand("add", "Adds a new target to the combat") {
+			string("target_name", "Name of the target") {
+				required = true
+			}
+			integer("target_health", "Initial and maximum HP of a target") {
+				required = true
+				maxValue = settings.maxHp.toLong()
+				minValue = 1
+			}
+			boolean("target_hidden", "Whether target's HP and status should be hidden") {
+				required = false
+				default = false
+			}
+		}
+		subCommand("edit", "Edits existing target") {
+			string("target_name", "Name of the target") {
+				required = true
+				setAllowedChoices(targets)
+			}
+			integer("target_health", "Initial and maximum HP of a target") {
+				required = true
+				maxValue = settings.maxHp.toLong()
+				minValue = 1
+			}
+		}
+		subCommand("end", "Starts a combat")
+		subCommand("start", "Starts a combat") {
+			mentionable("users", "Users to ping when combat starts") {
+				required = false
+			}
+		}
+		subCommand("remove", "Removes existing target") {
+			string("target_name", "Name of the target") {
+				required = true
+				setAllowedChoices(targets)
+			}
+		}
 	}
 
 	private suspend fun Kord.registerCommand(
 		name: String,
 		description: String,
 		builder: ChatInputCreateBuilder.() -> Unit = {}
-	) {
-		createGuildChatInputCommand(guildId, name, description, builder)
+	) = createGuildChatInputCommand(guildId, name, description, builder)
+
+	private fun BaseChoiceBuilder<String>.setAllowedChoices(choices: List<String>) {
+		this.choices = choices.map { Choice.StringChoice(it, Optional.Missing(), it) }.toMutableList()
 	}
 }

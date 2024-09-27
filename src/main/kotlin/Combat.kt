@@ -23,6 +23,7 @@ class Combat {
 		logger.info(tag, "Could not read previous combat! $e")
 		mutableMapOf()
 	}
+	private var onTargetsChange: suspend () -> Unit = {}
 	private var isStarted: Boolean = false
 
 	suspend fun add(interaction: ChatInputCommandInteraction) {
@@ -39,6 +40,7 @@ class Combat {
 		if (targetName in targets) return interaction.respondError(tag, "target_name $targetName already exists")
 
 		targets += Target(targetName, targetHp, targetHp, targetHidden)
+		onTargetsChange()
 		interaction.respondEphemeral {
 			content = "targets added: ${targets[targetName]}".also { logger.info(tag, it) }
 		}
@@ -164,9 +166,17 @@ class Combat {
 
 		val wasRemoved = targets.remove(targetName) != null
 
+		onTargetsChange()
 		interaction.respondEphemeral {
 			content = if (wasRemoved) "target removed: $targetName" else "target $targetName not found"
 		}
+	}
+
+	suspend fun registerOnTargetChange(register: suspend (targetNames: List<String>) -> Unit) {
+		onTargetsChange = {
+			register(targets.keys.sorted())
+		}
+		onTargetsChange()
 	}
 
 	private operator fun MutableMap<String, Target>.plusAssign(target: Target) = plusAssign(target.name to target)
