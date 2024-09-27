@@ -53,6 +53,12 @@ class Combat {
 
 		val targetName =
 			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
+		targets[targetName]?.let {
+			if (it.currentHp <= 0) return interaction.respondError(
+				tag,
+				"target_name must point to a living target"
+			)
+		}
 		val damage = interaction.command.integers["damage"]?.toInt()
 		val dice = interaction.command.integers["roll"]?.toInt()
 
