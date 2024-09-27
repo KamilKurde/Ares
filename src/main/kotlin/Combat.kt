@@ -86,7 +86,7 @@ class Combat {
 					if (rolled != null) {
 						append(rolled.joinToString(separator = "+", prefix = " (", postfix = ")"))
 					}
-					append(" $delt damage to **$targetName** ")
+					append(" **$delt** damage to **$targetName** ")
 					if (modified.currentHp != 0) {
 						val currentHpText = modified.currentHp.toString().takeUnless { modified.isHidden } ?: "???"
 						val maxHpText = modified.maxHp.toString().takeUnless { modified.isHidden } ?: "???"
