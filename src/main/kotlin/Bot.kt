@@ -159,6 +159,11 @@ class Bot(private val guildId: Snowflake) {
 		}
 		subCommand("end", "Starts a combat")
 		subCommand("start", "Starts a combat") {
+			string("name", "Name of the combat") {
+				required = true
+				minLength = 3
+				maxLength = 255
+			}
 			mentionable("users", "Users to ping when combat starts") {
 				required = false
 			}

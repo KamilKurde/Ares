@@ -28,6 +28,7 @@ class Combat {
 	}
 	private var onTargetsChange: suspend () -> Unit = {}
 	private var footerImage: String? = null
+	private var name: String = ""
 	private var isStarted: Boolean = false
 
 	suspend fun add(interaction: ChatInputCommandInteraction) {
@@ -199,6 +200,10 @@ class Combat {
 		val statusEmbed: MessageBuilder.() -> Unit = {
 			embed {
 				color = Color(255, 0, 0)
+				author {
+					icon = settings.embedIcon
+					name = this@Combat.name
+				}
 				targets.forEach { (targetName, target) ->
 					field {
 						inline = true
@@ -240,6 +245,7 @@ class Combat {
 
 		isStarted = true
 		footerImage = interaction.command.attachments.values.firstOrNull { it.isImage }?.url
+		name = interaction.command.strings["name"] ?: return interaction.respondError(tag, "name not found")
 
 		val usersToPing = interaction.command.mentionables["users"]?.id
 		val response = interaction.respondPublic {

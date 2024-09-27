@@ -7,6 +7,7 @@ import java.io.File
 data class Settings(
 	val maxHp: Int = 100,
 	val bossHpLevel: Int = 100,
+	val embedIcon: String? = null,
 	val emojis: Emojis = Emojis()
 )
 
