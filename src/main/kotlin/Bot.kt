@@ -92,10 +92,15 @@ class Bot(private val guildId: Snowflake) {
 			required = true
 			setAllowedChoices(targets)
 		}
-		integer("hp", "HP to deduct from target") {
-			required = true
+		integer("damage", "HP to deduct from target") {
+			required = false
 			minValue = 1
 			maxValue = 100
+		}
+		integer("roll", "Number of dice to roll to get damage") {
+			required = false
+			minValue = 1
+			maxValue = 10
 		}
 	}
 

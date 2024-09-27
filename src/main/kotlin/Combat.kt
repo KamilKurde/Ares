@@ -12,6 +12,8 @@ import net.peanuuutz.tomlkt.*
 import org.slf4j.Marker
 import org.slf4j.MarkerFactory
 import java.io.File
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 class Combat {
 	private val tag = MarkerFactory.getMarker("Combat")
@@ -51,16 +53,34 @@ class Combat {
 
 		val targetName =
 			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
-		val hp = interaction.command.integers["hp"]?.toInt() ?: return interaction.respondError(tag, "hp not found")
+		val damage = interaction.command.integers["damage"]?.toInt()
+		val dice = interaction.command.integers["roll"]?.toInt()
+
+		if (damage == null && dice == null) return interaction.respondError(tag, "Neither damage nor roll was found")
+		if (damage != null && dice != null) return interaction.respondError(
+			tag,
+			"Only damage or roll can be specified at the same time"
+		)
+
+		val rolled = dice?.let(::roll)
+		val delt = damage ?: rolled?.sum() ?: throw IllegalStateException("Space particles detected")
 
 		val modified = targets.compute(targetName) { _, target ->
-			target?.copy(currentHp = (target.currentHp - hp).coerceAtLeast(0))
+			target?.copy(currentHp = (target.currentHp - delt).coerceAtLeast(0))
 		}
 
 		if (modified != null) {
 			interaction.respondPublic {
 				content = buildString {
-					append("<@${interaction.user.id.value}> delt $hp damage to **$targetName** ")
+					append("<@${interaction.user.id.value}> delt")
+					val wasCritical = (rolled?.count { it == 6 } ?: 0) >= 2
+					if (wasCritical) {
+						append(" critical")
+					}
+					if (rolled != null) {
+						append(rolled.joinToString(separator = "+", prefix = " (", postfix = ")"))
+					}
+					append(" $delt damage to **$targetName** ")
 					if (modified.currentHp != 0) {
 						append("hp[${modified.currentHp}/${modified.maxHp}] remaining ${settings.emojis.attack}")
 					} else {
@@ -187,4 +207,6 @@ class Combat {
 			content = description
 		}
 	}
+
+	private fun roll(dice: Int) = List(dice) { Random.nextInt(1..6) }
 }
