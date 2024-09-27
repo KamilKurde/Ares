@@ -155,6 +155,30 @@ class Combat {
 		}
 	}
 
+	suspend fun heal(interaction: ChatInputCommandInteraction) {
+		val tag = MarkerFactory.getMarker("Combat#heal")
+
+		val targetName =
+			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
+		val target = targets[targetName] ?: return interaction.respondError(
+			tag,
+			"target_name must point to an actual target"
+		)
+		val hp = interaction.command.integers["hp"]?.toInt() ?: return interaction.respondError(tag, "hp not found")
+
+		val modified = target.copy(currentHp = (target.currentHp + hp).coerceAtMost(target.maxHp))
+		targets[targetName] = modified
+
+		interaction.respondPublic {
+			content = buildString {
+				append(
+					"<@${interaction.user.id.value}> healed ${modified.currentHp - target.currentHp} " +
+							"health of **$targetName** hp[${modified.currentHp}/${modified.maxHp}] remaining"
+				)
+			}
+		}
+	}
+
 	fun save() {
 		val serialized = Toml.encodeToString(targets)
 		File(".combat.ares").writeText(serialized)

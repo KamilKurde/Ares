@@ -66,6 +66,7 @@ class Bot(private val guildId: Snowflake) {
 
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "remove" ->
 				combat.remove(command.interaction)
+			invoker.rootName == "heal" -> combat.heal(command.interaction)
 		}
 	}
 
@@ -76,12 +77,18 @@ class Bot(private val guildId: Snowflake) {
 		val combatCommand = registerCommand("combat", "Controls status of a combat") {
 			combatCommandOptions(emptyList())
 		}
+		val healCommand = registerCommand("heal", "Heals a target") {
+			healCommandOptions(emptyList())
+		}
 		combat.registerOnTargetChange {
 			attackCommand.edit {
 				attackCommandOptions(it)
 			}
 			combatCommand.edit {
 				combatCommandOptions(it)
+			}
+			healCommand.edit {
+				healCommandOptions(it)
 			}
 		}
 		registerCommand("status", "Shows status of a combat")
@@ -161,6 +168,18 @@ class Bot(private val guildId: Snowflake) {
 				required = true
 				setAllowedChoices(targets)
 			}
+		}
+	}
+
+	private fun RootInputChatBuilder.healCommandOptions(targets: List<String>) {
+		string("target_name", "Name of the target") {
+			required = true
+			setAllowedChoices(targets)
+		}
+		integer("hp", "HP to deduct from target") {
+			required = true
+			minValue = 1
+			maxValue = 100
 		}
 	}
 
