@@ -54,11 +54,11 @@ class Bot(private val guildId: Snowflake) {
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "end" -> {
 				File(".combat.ares").delete()
 				combat = Combat()
-				command.kord.removeOldCommands()
-				command.kord.setUpCommands()
 				command.interaction.respondPublic {
 					content = "**COMBAT ENDED_**"
 				}
+				command.kord.removeOldCommands()
+				command.kord.setUpCommands()
 			}
 
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "start" ->
