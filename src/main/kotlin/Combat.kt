@@ -1,3 +1,4 @@
+import dev.kord.common.Color
 import dev.kord.core.behavior.interaction.respondEphemeral
 import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.behavior.interaction.response.PublicMessageInteractionResponseBehavior
@@ -197,6 +198,7 @@ class Combat {
 		}
 		val statusEmbed: MessageBuilder.() -> Unit = {
 			embed {
+				color = Color(255, 0, 0)
 				targets.forEach { (targetName, target) ->
 					field {
 						inline = true
