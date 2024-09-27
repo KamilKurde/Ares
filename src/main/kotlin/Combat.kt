@@ -93,7 +93,7 @@ class Combat {
 					append(" critical")
 				}
 				if (rolled != null) {
-					append(rolled.joinToString(separator = "+", prefix = " (", postfix = ")"))
+					append(rolled.joinToString(separator = "+", prefix = " ||(", postfix = ")||"))
 				}
 
 				when {
