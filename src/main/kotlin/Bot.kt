@@ -43,14 +43,11 @@ class Bot(private val guildId: Snowflake) {
 		when {
 			invoker.rootName == "attack" -> combat.attack(command.interaction)
 			invoker.rootName == "status" -> combat.status(command.interaction)
-			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "add" -> combat.add(
-				command
-					.interaction
-			)
-			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "edit" -> combat.edit(
-				command
-					.interaction
-			)
+			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "add" ->
+				combat.add(command.interaction)
+
+			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "edit" ->
+				combat.edit(command.interaction)
 
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "end" -> {
 				File(".combat.ares").delete()
@@ -60,15 +57,11 @@ class Bot(private val guildId: Snowflake) {
 				}
 			}
 
-			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "start" -> combat.start(
-				command
-					.interaction
-			)
+			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "start" ->
+				combat.start(command.interaction)
 
-			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "remove" -> combat.remove(
-				command
-					.interaction
-			)
+			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "remove" ->
+				combat.remove(command.interaction)
 		}
 	}
 
