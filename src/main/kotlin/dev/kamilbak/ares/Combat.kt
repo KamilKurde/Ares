@@ -122,9 +122,9 @@ class Combat {
 							if (modified.currentArmor != 0) {
 								append(" ap[${modified.currentArmor}/${modified.maxArmor}]")
 							}
-							append(" remaining ${settings.emojis.attack}")
+							append(" remaining ${settings.emojis.attack.orEmpty()}")
 						} else {
-							append("target eliminated ${settings.emojis.kill}")
+							append("target eliminated ${settings.emojis.kill.orEmpty()}")
 						}
 					}
 
