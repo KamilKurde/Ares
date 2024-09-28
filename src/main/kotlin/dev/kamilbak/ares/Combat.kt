@@ -83,7 +83,10 @@ class Combat {
 
 		val modified = target.copy(
 			currentHp = (target.currentHp - actuallyDelt.coerceAtLeast(0)).coerceAtLeast(0),
-			currentArmor = if (actuallyDelt >= 0) target.currentArmor - 1 else target.currentArmor
+			currentArmor = if (target.currentArmor != 0 && actuallyDelt >= 0)
+				target.currentArmor - 1
+			else
+				target.currentArmor
 		).also { targets[targetName] = it }
 
 		interaction.respondPublic {
