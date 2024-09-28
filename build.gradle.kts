@@ -7,8 +7,8 @@ plugins {
 	application
 }
 
-group = "com.github.KamilKurde"
-version = "0.1.0"
+group = "dev.kamilbak"
+version = "1.0.0"
 
 repositories {
 	mavenCentral()
@@ -21,9 +21,13 @@ dependencies {
 }
 
 application {
-	mainClass.set("MainKt")
+	mainClass.set("dev.kamilbak.ares.MainKt")
 }
 
 tasks.withType(ShadowJar::class.java) {
 	archiveClassifier.set("")
+	minimize {
+		// Used by Kord
+		exclude(dependency("io.ktor:ktor-serialization-kotlinx-json:.*"))
+	}
 }

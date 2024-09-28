@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.0.20"
-shadow = "8.1.1"
+shadow = "8.3.2"
 kord = "0.14.0"
 slf4j = "2.0.13"
 tomlkt = "0.4.0"
@@ -8,7 +8,7 @@ tomlkt = "0.4.0"
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 
 [libraries]
 kord-core = { group = "dev.kord", name  = "kord-core", version.ref = "kord" }
