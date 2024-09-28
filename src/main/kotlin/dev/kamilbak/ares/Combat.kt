@@ -60,6 +60,8 @@ class Combat {
 	suspend fun attack(interaction: ChatInputCommandInteraction) {
 		val tag = MarkerFactory.getMarker("Combat#attack")
 
+		if (isStarted.not()) return interaction.respondError(tag, "You can't partake in a combat that did not start")
+
 		val targetName =
 			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
 		val target = targets[targetName]?.takeUnless { it.currentHp <= 0 } ?: return interaction.respondError(
@@ -164,6 +166,8 @@ class Combat {
 
 	suspend fun heal(interaction: ChatInputCommandInteraction) {
 		val tag = MarkerFactory.getMarker("Combat#heal")
+
+		if (isStarted.not()) return interaction.respondError(tag, "You can't partake in a combat that did not start")
 
 		val targetName =
 			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
