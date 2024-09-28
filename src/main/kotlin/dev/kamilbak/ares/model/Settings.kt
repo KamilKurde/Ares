@@ -1,3 +1,6 @@
+package dev.kamilbak.ares.model
+
+import dev.kamilbak.ares.logger
 import kotlinx.serialization.Serializable
 import net.peanuuutz.tomlkt.*
 import org.slf4j.MarkerFactory

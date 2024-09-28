@@ -1,3 +1,9 @@
+package dev.kamilbak.ares
+
+import dev.kamilbak.ares.model.Target
+import dev.kamilbak.ares.model.settings
+import dev.kamilbak.ares.util.Text
+import dev.kamilbak.ares.util.format
 import dev.kord.common.Color
 import dev.kord.core.behavior.interaction.respondEphemeral
 import dev.kord.core.behavior.interaction.respondPublic
@@ -6,8 +12,6 @@ import dev.kord.core.behavior.interaction.response.edit
 import dev.kord.core.entity.interaction.ChatInputCommandInteraction
 import dev.kord.rest.builder.message.MessageBuilder
 import dev.kord.rest.builder.message.embed
-import formatted.Text
-import formatted.format
 import kotlinx.serialization.encodeToString
 import net.peanuuutz.tomlkt.*
 import org.slf4j.Marker

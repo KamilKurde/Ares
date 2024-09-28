@@ -1,3 +1,6 @@
+package dev.kamilbak.ares
+
+import dev.kamilbak.ares.model.settings
 import dev.kord.common.entity.Choice
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.Optional

@@ -1,3 +1,5 @@
+package dev.kamilbak.ares
+
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import kotlinx.coroutines.runBlocking

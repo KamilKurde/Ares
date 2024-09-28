@@ -1,3 +1,5 @@
+package dev.kamilbak.ares.model
+
 import kotlinx.serialization.Serializable
 
 @Serializable

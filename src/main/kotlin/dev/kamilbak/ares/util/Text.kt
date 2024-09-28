@@ -1,4 +1,4 @@
-package formatted
+package dev.kamilbak.ares.util
 
 @JvmInline
 value class Text private constructor(private val raw: String) {
