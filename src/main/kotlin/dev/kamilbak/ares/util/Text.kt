@@ -69,3 +69,27 @@ fun String.toText(
 	decoration: Text.Decoration = Text.Decoration.Normal,
 	color: Text.Color? = null
 ): Text = Text.from(this, decoration, color)
+
+fun buildText(build: TextBuilder.() -> Unit): Text {
+	val builder = object : TextBuilder {
+		var accumulated = "".toText()
+		override fun append(text: Text) {
+			accumulated += text
+		}
+
+		override fun append(text: String) {
+			accumulated += text
+		}
+	}
+
+	builder.build()
+
+	return builder.accumulated
+}
+
+interface TextBuilder {
+	fun append(text: Text)
+	fun appendLine(text: Text) = append(text + "\n")
+	fun append(text: String)
+	fun appendLine(text: String) = append(text + "\n")
+}
