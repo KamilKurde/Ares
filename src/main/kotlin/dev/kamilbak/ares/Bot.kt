@@ -48,6 +48,7 @@ class Bot(private val guildId: Snowflake) {
 
 	private suspend fun onCommand(command: ChatInputCommandInteractionCreateEvent) {
 		val invoker = command.interaction.command
+		logger.info(MarkerFactory.getMarker("Bot#onCommand"), "Parsing a ${invoker.rootName} command")
 		when {
 			invoker.rootName == "terminal" -> terminals.create(command.interaction)
 			invoker.rootName == "attack" -> combat.attack(command.interaction)
@@ -242,7 +243,10 @@ class Bot(private val guildId: Snowflake) {
 		name: String,
 		description: String,
 		builder: ChatInputCreateBuilder.() -> Unit = {}
-	) = createGuildChatInputCommand(guildId, name, description, builder)
+	): GuildChatInputCommand {
+		logger.info(MarkerFactory.getMarker("Bot#registerCommand"), "Registering $name")
+		return createGuildChatInputCommand(guildId, name, description, builder)
+	}
 
 	private fun BaseChoiceBuilder<String>.setAllowedChoices(choices: List<String>) {
 		this.choices = choices.map { Choice.StringChoice(it, Optional.Missing(), it) }.toMutableList()
