@@ -23,7 +23,7 @@ data class Terminal(
 				fun generateCode(difficulty: Int): String {
 					val generated = buildString {
 						repeat(difficulty) {
-							append((0..15).random().toString(16))
+							append((0..15).random().toString(16).uppercase())
 						}
 					}
 
