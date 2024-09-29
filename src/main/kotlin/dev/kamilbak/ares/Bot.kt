@@ -8,6 +8,7 @@ import dev.kord.common.entity.optional.Optional
 import dev.kord.core.Kord
 import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.entity.application.ApplicationCommand
+import dev.kord.core.entity.application.GuildChatInputCommand
 import dev.kord.core.entity.interaction.SubCommand
 import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
 import dev.kord.core.on

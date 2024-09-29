@@ -2,8 +2,7 @@ package dev.kamilbak.ares
 
 import dev.kamilbak.ares.model.Target
 import dev.kamilbak.ares.model.settings
-import dev.kamilbak.ares.util.Text
-import dev.kamilbak.ares.util.format
+import dev.kamilbak.ares.util.*
 import dev.kord.common.Color
 import dev.kord.core.behavior.interaction.respondEphemeral
 import dev.kord.core.behavior.interaction.respondPublic
@@ -14,7 +13,6 @@ import dev.kord.rest.builder.message.MessageBuilder
 import dev.kord.rest.builder.message.embed
 import kotlinx.serialization.encodeToString
 import net.peanuuutz.tomlkt.*
-import org.slf4j.Marker
 import org.slf4j.MarkerFactory
 import java.io.File
 import kotlin.random.Random
@@ -295,13 +293,6 @@ class Combat {
 			register(targets.keys.sorted())
 		}
 		onTargetsChange()
-	}
-
-	private suspend fun ChatInputCommandInteraction.respondError(tag: Marker, description: String) {
-		logger.error(tag, description)
-		respondEphemeral {
-			content = description
-		}
 	}
 
 	private fun roll(dice: Int) = List(dice) { Random.nextInt(1..6) }
