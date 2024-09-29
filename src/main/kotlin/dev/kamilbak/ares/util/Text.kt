@@ -4,8 +4,9 @@ package dev.kamilbak.ares.util
 value class Text private constructor(private val raw: String) {
 	companion object {
 		private const val ESC = "\u001B["
-		fun from(string: String, decoration: Decoration = Decoration.Normal, color: Color? = null): Text =
-			Text(buildString {
+		fun from(string: String, decoration: Decoration = Decoration.Normal, color: Color? = null): Text {
+			if (string.isBlank()) return Text(string)
+			return Text(buildString {
 				append(ESC)
 				append(
 					when (decoration) {
@@ -34,6 +35,7 @@ value class Text private constructor(private val raw: String) {
 				append(ESC)
 				append("0m")
 			})
+		}
 	}
 
 	override fun toString(): String = buildString {
