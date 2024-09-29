@@ -1,6 +1,7 @@
 package dev.kamilbak.ares
 
 import dev.kamilbak.ares.model.settings
+import dev.kamilbak.ares.terminal.Terminals
 import dev.kord.common.entity.Choice
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.Optional
@@ -17,6 +18,7 @@ import java.io.File
 
 class Bot(private val guildId: Snowflake) {
 	private var combat: Combat = Combat()
+	private val terminals: Terminals = Terminals()
 
 	suspend fun initialize(kord: Kord) {
 		val tag = MarkerFactory.getMarker("Bot#initialize")
@@ -46,6 +48,7 @@ class Bot(private val guildId: Snowflake) {
 	private suspend fun onCommand(command: ChatInputCommandInteractionCreateEvent) {
 		val invoker = command.interaction.command
 		when {
+			invoker.rootName == "terminal" -> terminals.create(command.interaction)
 			invoker.rootName == "attack" -> combat.attack(command.interaction)
 			invoker.rootName == "status" -> combat.status(command.interaction)
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "add" ->
@@ -92,6 +95,37 @@ class Bot(private val guildId: Snowflake) {
 			}
 			healCommand.edit {
 				healCommandOptions(it)
+			}
+		}
+		registerCommand("terminal", "Launched a terminal minigame") {
+			string("name", "Name of the terminal") {
+				required = true
+			}
+			user("hacker", "User that is connected to that terminal") {
+				required = true
+			}
+			integer("difficulty", "Number of hexadecimal digits that answer will have. Defaults to 8") {
+				required = false
+				minValue = 4
+				maxValue = 16
+			}
+			integer("unknowns", "Number of digits that are not shown for the target. Defaults to 4") {
+				required = false
+				minValue = 1
+				maxValue = 8
+			}
+			integer("viruses", "Number of viruses there will be in a terminal. Defaults to 1") {
+				required = false
+				minValue = 0
+				maxValue = 9
+			}
+		}
+		val hackCommand = registerCommand("hack", "Hack command") {
+			hackCommandOptions(emptyList())
+		}
+		terminals.registerOnTerminalsChange {
+			hackCommand.edit {
+				hackCommandOptions(it)
 			}
 		}
 		registerCommand("status", "Shows status of a combat")
@@ -179,6 +213,15 @@ class Bot(private val guildId: Snowflake) {
 				required = true
 				setAllowedChoices(targets)
 			}
+		}
+	}
+
+	private fun RootInputChatBuilder.hackCommandOptions(targets: List<String>) {
+		string("terminal_name", "Name of the terminal to hack") {
+			setAllowedChoices(targets)
+		}
+		string("answer", "Answer to use") {
+			setAllowedChoices(List(10) { "0x00$it" })
 		}
 	}
 
