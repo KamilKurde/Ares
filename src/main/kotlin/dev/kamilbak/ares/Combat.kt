@@ -224,20 +224,20 @@ class Combat {
 						}
 
 						val status = when {
-							target.isHidden -> "UNKNOWN".format(color = Text.Color.Yellow)
-							target.currentHp > 0 -> "ONLINE_".format(color = aliveColor)
-							else -> "OFFLINE".format(color = Text.Color.Red)
+							target.isHidden -> "UNKNOWN".toText(color = Text.Color.Yellow)
+							target.currentHp > 0 -> "ONLINE_".toText(color = aliveColor)
+							else -> "OFFLINE".toText(color = Text.Color.Red)
 						}
 						val hpStats = when {
-							target.isHidden -> "???/???".format(color = Text.Color.Yellow)
-							else -> "${target.currentHp.toStat()}/${target.maxHp.toStat()}".format(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
+							target.isHidden -> "???/???".toText(color = Text.Color.Yellow)
+							else -> "${target.currentHp.toStat()}/${target.maxHp.toStat()}".toText(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
 						}
 						val apStats = when {
-							target.isHidden -> "???/???".format(color = Text.Color.Yellow)
-							else -> "${target.currentArmor.toStat()}/${target.maxArmor.toStat()}".format(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
+							target.isHidden -> "???/???".toText(color = Text.Color.Yellow)
+							else -> "${target.currentArmor.toStat()}/${target.maxArmor.toStat()}".toText(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
 						}
 						value =
-							("status[".format() + status + "]\nhp    [" + hpStats + "]\nap    [" + apStats + "]").toString()
+							("status[".toText() + status + "]\nhp    [" + hpStats + "]\nap    [" + apStats + "]").toString()
 					}
 				}
 

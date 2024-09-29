@@ -63,7 +63,7 @@ value class Text private constructor(private val raw: String) {
 	}
 }
 
-fun String.format(
+fun String.toText(
 	decoration: Text.Decoration = Text.Decoration.Normal,
 	color: Text.Color? = null
 ): Text = Text.from(this, decoration, color)

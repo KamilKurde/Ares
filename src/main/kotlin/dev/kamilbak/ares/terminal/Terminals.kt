@@ -1,6 +1,7 @@
 package dev.kamilbak.ares.terminal
 
 import dev.kamilbak.ares.logger
+import dev.kamilbak.ares.util.Text
 import dev.kamilbak.ares.util.respondError
 import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.entity.interaction.ChatInputCommandInteraction
