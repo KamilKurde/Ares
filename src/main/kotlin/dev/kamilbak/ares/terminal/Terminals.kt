@@ -1,8 +1,7 @@
 package dev.kamilbak.ares.terminal
 
 import dev.kamilbak.ares.logger
-import dev.kamilbak.ares.util.Text
-import dev.kamilbak.ares.util.respondError
+import dev.kamilbak.ares.util.*
 import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.entity.interaction.ChatInputCommandInteraction
 import dev.kord.rest.builder.message.embed
@@ -34,8 +33,16 @@ class Terminals {
 
 		interaction.respondPublic {
 			embed {
-				title = "CODE BREACH\u200F$name"
-				description = "SEQUENCER_${terminal.question}"
+				title = "CODE BREACH\t\t$name"
+				description = buildText {
+					append("SEQUENCER_")
+					appendLine(terminal.question.toText(color = Text.Color.Red))
+					appendLine("${terminal.attemptsRemaining} ATTEMPT(S) REMAINING:")
+					appendLine("-".repeat(37))
+					terminal.answers.forEachIndexed { index, (answer) ->
+						appendLine("0x00$index  <(=<(>$$,'};  ${answer.padStart(16, '0')}")
+					}
+				}.toString()
 			}
 		}
 
