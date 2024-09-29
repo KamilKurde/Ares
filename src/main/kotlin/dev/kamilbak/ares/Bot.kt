@@ -27,7 +27,7 @@ class Bot(private val guildId: Snowflake) {
 		kord.removeOldCommands()
 		logger.info(tag, "Setting up command hook")
 		kord.on<ChatInputCommandInteractionCreateEvent>(consumer = ::onCommand)
-		logger.info(tag, "Setting up new commands commands")
+		logger.info(tag, "Setting up new commands")
 		kord.setUpCommands()
 		logger.info(tag, "Logging in")
 		kord.login()
@@ -244,7 +244,7 @@ class Bot(private val guildId: Snowflake) {
 		description: String,
 		builder: ChatInputCreateBuilder.() -> Unit = {}
 	): GuildChatInputCommand {
-		logger.info(MarkerFactory.getMarker("Bot#registerCommand"), "Registering $name")
+		logger.info(MarkerFactory.getMarker("Bot#registerCommand"), name)
 		return createGuildChatInputCommand(guildId, name, description, builder)
 	}
 
