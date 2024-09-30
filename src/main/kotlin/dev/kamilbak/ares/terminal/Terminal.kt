@@ -6,7 +6,7 @@ data class Terminal(
 	val hacker: Snowflake,
 	val attemptsRemaining: Int,
 	val question: String,
-	val answers: List<Pair<String, AnswerType>>
+	val answers: List<Pair<String, AnswerType>>,
 ) {
 	companion object {
 		fun fromCommand(

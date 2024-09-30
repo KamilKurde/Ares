@@ -17,7 +17,8 @@ data class Settings(
 	val maxHp: Int = 100,
 	val bossHpLevel: Int = 100,
 	val embedIcon: String? = null,
-	val emojis: Emojis = Emojis()
+	val emojis: Emojis = Emojis(),
+	val images: Images = Images(),
 )
 
 /**
@@ -30,6 +31,12 @@ data class Emojis(
 	val combatStart: String? = null,
 	val attack: String? = null,
 	val kill: String? = null,
+)
+
+@Serializable
+data class Images(
+	val terminalSuccess: String? = null,
+	val terminalFailure: String? = null,
 )
 
 val settings = try {

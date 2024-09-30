@@ -1,6 +1,7 @@
 package dev.kamilbak.ares.terminal
 
 import dev.kamilbak.ares.logger
+import dev.kamilbak.ares.model.settings
 import dev.kamilbak.ares.util.*
 import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
@@ -61,11 +62,30 @@ class Terminals {
 		when (ansnwer) {
 			Terminal.AnswerType.Correct -> interaction.respondPublic {
 				content = "Access granted"
+
+				previousResponse.edit {
+					terminal(name, terminal, settings.images.terminalSuccess)
+				}
+				terminals.remove(name)
+				onTerminalsChange()
 			}
 
 			Terminal.AnswerType.Incorrect -> interaction.respondPublic {
 				val attemptsRemaining = terminal.attemptsRemaining - 1
-				content = if (attemptsRemaining == 0) "Access denied, terminal locked down" else "Access denied"
+				content = buildString {
+					appendLine("Access denied")
+					if (attemptsRemaining == 0) {
+						appendLine("Terminal locked down")
+					}
+				}
+
+				if (attemptsRemaining == 0) {
+					previousResponse.edit {
+						terminal(name, terminal, settings.images.terminalFailure)
+					}
+					terminals.remove(name)
+					return
+				}
 
 				val newTerminal = terminal.copy(attemptsRemaining = attemptsRemaining)
 
@@ -83,6 +103,14 @@ class Terminals {
 					if (attemptsRemaining == 0) {
 						appendLine("Terminal locked down")
 					}
+				}
+
+				if (attemptsRemaining == 0) {
+					previousResponse.edit {
+						terminal(name, terminal, settings.images.terminalFailure)
+					}
+					terminals.remove(name)
+					return
 				}
 
 				val newTerminal = terminal.copy(attemptsRemaining = attemptsRemaining)
@@ -103,7 +131,7 @@ class Terminals {
 		onTerminalsChange()
 	}
 
-	private fun MessageBuilder.terminal(name: String, terminal: Terminal) = embed {
+	private fun MessageBuilder.terminal(name: String, terminal: Terminal, image: String? = null) = embed {
 		title = "CODE BREACH\t\t$name"
 		description = buildText {
 			append("SEQUENCER_")
@@ -114,5 +142,6 @@ class Terminals {
 				appendLine("0x00$index  <(=<(>$$,'};  ${answer.padStart(16, '0')}")
 			}
 		}.toString()
+		this.image = image
 	}
 }
