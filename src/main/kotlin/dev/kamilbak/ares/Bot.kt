@@ -105,7 +105,7 @@ class Bot(private val guildId: Snowflake) {
 				required = true
 			}
 			user("hacker", "User that is connected to that terminal") {
-				required = true
+				required = false
 			}
 			integer("difficulty", "Number of hexadecimal digits that answer will have. Defaults to 8") {
 				required = false

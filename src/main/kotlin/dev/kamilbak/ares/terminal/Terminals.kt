@@ -22,7 +22,7 @@ class Terminals {
 		val name = interaction.command.strings["name"] ?: return interaction.respondError(tag, "name not found")
 		if (name in terminals.keys) return interaction.respondError(tag, "name already exists")
 
-		val hacker = interaction.command.users["hacker"] ?: return interaction.respondError(tag, "hacker not found")
+		val hacker = interaction.command.users["hacker"]
 
 		val difficulty = interaction.command.integers["difficulty"]?.toInt() ?: 8
 		val unknowns = interaction.command.integers["unknowns"]?.toInt() ?: 4
@@ -31,9 +31,9 @@ class Terminals {
 
 		logger.info(
 			tag,
-			"Creating terminal for ${hacker.username}, with difficulty $difficulty, unknown $unknowns and viruses $viruses"
+			"Creating terminal for ${hacker?.username}, with difficulty $difficulty, unknown $unknowns and viruses $viruses"
 		)
-		val terminal = Terminal.fromCommand(hacker.id, difficulty, unknowns, viruses, attempts)
+		val terminal = Terminal.fromCommand(hacker?.id, difficulty, unknowns, viruses, attempts)
 
 		val response = interaction.respondPublic {
 			terminal(name, terminal)
@@ -54,6 +54,13 @@ class Terminals {
 					"given name not " +
 					"found"
 		)
+		terminal.hacker?.let {
+			if (interaction.user.id != it) return interaction.respondError(
+				tag,
+				"Expecting <@$it>, and you are not them"
+			)
+		}
+
 		val answerIndex =
 			interaction.command.integers["answer"]?.toInt() ?: return interaction.respondError(tag, "answer not found")
 

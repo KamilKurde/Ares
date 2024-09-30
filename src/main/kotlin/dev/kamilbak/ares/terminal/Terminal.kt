@@ -3,14 +3,14 @@ package dev.kamilbak.ares.terminal
 import dev.kord.common.entity.Snowflake
 
 data class Terminal(
-	val hacker: Snowflake,
+	val hacker: Snowflake?,
 	val attemptsRemaining: Int,
 	val question: String,
 	val answers: List<Pair<String, AnswerType>>,
 ) {
 	companion object {
 		fun fromCommand(
-			hacker: Snowflake,
+			hacker: Snowflake?,
 			difficulty: Int,
 			unknowns: Int,
 			viruses: Int,
