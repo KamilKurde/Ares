@@ -51,6 +51,7 @@ class Bot(private val guildId: Snowflake) {
 		logger.info(MarkerFactory.getMarker("Bot#onCommand"), "Parsing a ${invoker.rootName} command")
 		when {
 			invoker.rootName == "terminal" -> terminals.create(command.interaction)
+			invoker.rootName == "hack" -> terminals.hack(command.interaction)
 			invoker.rootName == "attack" -> combat.attack(command.interaction)
 			invoker.rootName == "status" -> combat.status(command.interaction)
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "add" ->
@@ -220,10 +221,14 @@ class Bot(private val guildId: Snowflake) {
 
 	private fun RootInputChatBuilder.hackCommandOptions(targets: List<String>) {
 		string("terminal_name", "Name of the terminal to hack") {
+			required = true
 			setAllowedChoices(targets)
 		}
-		string("answer", "Answer to use") {
-			setAllowedChoices(List(10) { "0x00$it" })
+		integer("answer", "Answer to use") {
+			required = true
+			repeat(10) {
+				choice("0x00$it", it.toLong())
+			}
 		}
 	}
 
