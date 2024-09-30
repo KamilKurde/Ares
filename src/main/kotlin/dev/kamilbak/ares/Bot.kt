@@ -122,6 +122,11 @@ class Bot(private val guildId: Snowflake) {
 				minValue = 0
 				maxValue = 9
 			}
+			integer("attempts", "Number of attempts a hacker have before terminal locks down. Defaults to 2") {
+				required = false
+				minValue = 1
+				maxValue = 9
+			}
 		}
 		val hackCommand = registerCommand("hack", "Hack command") {
 			hackCommandOptions(emptyList())

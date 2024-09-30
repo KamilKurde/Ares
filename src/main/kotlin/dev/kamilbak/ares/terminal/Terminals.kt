@@ -26,12 +26,13 @@ class Terminals {
 		val difficulty = interaction.command.integers["difficulty"]?.toInt() ?: 8
 		val unknowns = interaction.command.integers["unknowns"]?.toInt() ?: 4
 		val viruses = interaction.command.integers["viruses"]?.toInt() ?: 1
+		val attempts = interaction.command.integers["attempts"]?.toInt() ?: 2
 
 		logger.info(
 			tag,
 			"Creating terminal for ${hacker.username}, with difficulty $difficulty, unknown $unknowns and viruses $viruses"
 		)
-		val terminal = Terminal.fromCommand(hacker.id, difficulty, unknowns, viruses, 2)
+		val terminal = Terminal.fromCommand(hacker.id, difficulty, unknowns, viruses, attempts)
 
 		val response = interaction.respondPublic {
 			terminal(name, terminal)
