@@ -77,7 +77,21 @@ class Terminals {
 			}
 
 			Terminal.AnswerType.Virus -> interaction.respondPublic {
+				val attemptsRemaining = (terminal.attemptsRemaining - 2).coerceAtLeast(0)
+				content = buildString {
+					appendLine("ICE detected. You received 1d6 damage. ")
+					if (attemptsRemaining == 0) {
+						appendLine("Terminal locked down")
+					}
+				}
 
+				val newTerminal = terminal.copy(attemptsRemaining = attemptsRemaining)
+
+				val newResponse = previousResponse.edit {
+					terminal(name, newTerminal)
+				}
+
+				terminals[name] = newTerminal to newResponse
 			}
 		}
 	}
