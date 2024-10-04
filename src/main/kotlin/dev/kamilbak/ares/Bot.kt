@@ -51,6 +51,7 @@ class Bot(private val guildId: Snowflake) {
 		logger.info(MarkerFactory.getMarker("Bot#onCommand"), "Parsing a ${invoker.rootName} command")
 		when {
 			invoker.rootName == "terminal" -> terminals.create(command.interaction)
+			invoker.rootName == "terminate" -> terminals.terminate(command.interaction)
 			invoker.rootName == "hack" -> terminals.hack(command.interaction)
 			invoker.rootName == "attack" -> combat.attack(command.interaction)
 			invoker.rootName == "status" -> combat.status(command.interaction)
@@ -75,6 +76,7 @@ class Bot(private val guildId: Snowflake) {
 
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "remove" ->
 				combat.remove(command.interaction)
+
 			invoker.rootName == "heal" -> combat.heal(command.interaction)
 		}
 	}
@@ -128,12 +130,18 @@ class Bot(private val guildId: Snowflake) {
 				maxValue = 9
 			}
 		}
+		val terminateCommand = registerCommand("terminate", "Remove terminal with given name") {
+			terminateCommandOptions(emptyList())
+		}
 		val hackCommand = registerCommand("hack", "Hack command") {
 			hackCommandOptions(emptyList())
 		}
 		terminals.registerOnTerminalsChange {
 			hackCommand.edit {
 				hackCommandOptions(it)
+			}
+			terminateCommand.edit {
+				terminateCommandOptions(it)
 			}
 		}
 		registerCommand("status", "Shows status of a combat")
@@ -246,6 +254,13 @@ class Bot(private val guildId: Snowflake) {
 			required = true
 			minValue = 1
 			maxValue = 100
+		}
+	}
+
+	private fun RootInputChatBuilder.terminateCommandOptions(targets: List<String>) {
+		string("terminal_name", "Name of the terminal to terminate") {
+			required = true
+			setAllowedChoices(targets)
 		}
 	}
 

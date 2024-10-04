@@ -3,6 +3,7 @@ package dev.kamilbak.ares.terminal
 import dev.kamilbak.ares.logger
 import dev.kamilbak.ares.model.settings
 import dev.kamilbak.ares.util.*
+import dev.kord.core.behavior.interaction.respondEphemeral
 import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
 import dev.kord.core.behavior.interaction.response.edit
@@ -100,6 +101,22 @@ class Terminals {
 				}
 			}
 		}
+	}
+
+	suspend fun terminate(interaction: ChatInputCommandInteraction) {
+		val tag = MarkerFactory.getMarker("Terminals#terminate")
+		val terminalName = interaction.command.strings["terminal_name"] ?: return interaction.respondError(
+			tag,
+			"terminal_name not found"
+		)
+
+		val (_, removedResponse) = terminals.remove(terminalName) ?: return interaction.respondError(
+			tag,
+			"No terminal with $terminalName found"
+		)
+		removedResponse.delete()
+		onTerminalsChange()
+		interaction.respondEphemeral { content = "Terminal $terminalName removed" }
 	}
 
 	suspend fun registerOnTerminalsChange(register: suspend (targetNames: List<String>) -> Unit) {
