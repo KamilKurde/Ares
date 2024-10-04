@@ -60,7 +60,7 @@ class Terminals {
 			tag, "terminal_name not found"
 		)
 		val (terminal, previousResponse) = terminals[name] ?: return interaction.respondError(
-			tag, "terminal with " + "given name not " + "found"
+			tag, "terminal with given name not found"
 		)
 		terminal.hacker?.let {
 			if (interaction.user.id != it) return interaction.respondError(
@@ -112,6 +112,43 @@ class Terminals {
 					terminals[name] = newTerminal to newResponse
 				}
 			}
+		}
+	}
+
+	suspend fun reveal(interaction: ChatInputCommandInteraction) {
+		val tag = MarkerFactory.getMarker("Terminals#reveal")
+		val name = interaction.command.strings["terminal_name"] ?: return interaction.respondError(
+			tag, "terminal_name not found"
+		)
+		val (terminal, previousResponse) = terminals[name] ?: return interaction.respondError(
+			tag, "terminal with given name not found"
+		)
+		terminal.hacker?.let {
+			if (interaction.user.id != it) return interaction.respondError(
+				tag, "Expecting <@$it>, and you are not them"
+			)
+		}
+
+		if (terminal.attemptsRemaining == 1) return interaction.respondError(tag, "You can't reveal new characters")
+
+		val newQuestion = terminal.run {
+			val charToReveal = question.withIndex().filter { it.value == '?' }.random().index
+			val correctAnswer = answers.first { it.type == Terminal.Answer.Type.Correct }.value
+
+			question.toCharArray().apply {
+				set(charToReveal, correctAnswer[charToReveal])
+			}.concatToString()
+		}
+
+		val newTerminal = terminal.copy(question = newQuestion, attemptsRemaining = terminal.attemptsRemaining - 1)
+		val newResponse = previousResponse.edit {
+			terminal(name, newTerminal)
+		}
+
+		terminals[name] = newTerminal to newResponse
+
+		interaction.respondPublic {
+			content = "Revealed one digit in SEQUENCER_"
 		}
 	}
 

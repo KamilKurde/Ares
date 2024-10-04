@@ -53,6 +53,7 @@ class Bot(private val guildId: Snowflake) {
 			invoker.rootName == "terminal" -> terminals.create(command.interaction)
 			invoker.rootName == "terminate" -> terminals.terminate(command.interaction)
 			invoker.rootName == "hack" -> terminals.hack(command.interaction)
+			invoker.rootName == "reveal" -> terminals.reveal(command.interaction)
 			invoker.rootName == "attack" -> combat.attack(command.interaction)
 			invoker.rootName == "status" -> combat.status(command.interaction)
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "add" ->
@@ -102,6 +103,9 @@ class Bot(private val guildId: Snowflake) {
 				healCommandOptions(it)
 			}
 		}
+		val revealCommand = registerCommand("reveal", "Reveals one character in sequencer by giving up one attempt") {
+			revealCommandOptions(emptyList())
+		}
 		registerCommand("terminal", "Launched a terminal minigame") {
 			string("name", "Name of the terminal") {
 				required = true
@@ -139,6 +143,9 @@ class Bot(private val guildId: Snowflake) {
 		terminals.registerOnTerminalsChange {
 			hackCommand.edit {
 				hackCommandOptions(it)
+			}
+			revealCommand.edit {
+				revealCommandOptions(it)
 			}
 			terminateCommand.edit {
 				terminateCommandOptions(it)
@@ -254,6 +261,13 @@ class Bot(private val guildId: Snowflake) {
 			required = true
 			minValue = 1
 			maxValue = 100
+		}
+	}
+
+	private fun RootInputChatBuilder.revealCommandOptions(targets: List<String>) {
+		string("terminal_name", "Name of the terminal to terminate") {
+			required = true
+			setAllowedChoices(targets)
 		}
 	}
 
