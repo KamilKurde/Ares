@@ -11,6 +11,8 @@ import dev.kord.core.entity.interaction.ChatInputCommandInteraction
 import dev.kord.rest.builder.message.MessageBuilder
 import dev.kord.rest.builder.message.embed
 import org.slf4j.MarkerFactory
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 class Terminals {
 	private val tag = MarkerFactory.getMarker("Terminals")
@@ -85,14 +87,16 @@ class Terminals {
 					(terminal.attemptsRemaining - if (answer == Terminal.AnswerType.Virus) 2 else 1).coerceAtLeast(0)
 				val newTerminal = terminal.copy(attemptsRemaining = attemptsRemaining)
 				content = buildString {
+					append("**")
 					if (answer == Terminal.AnswerType.Virus) {
-						appendLine("ICE detected. You received 1d6 damage. ")
+						appendLine("ICE detected. You received ${Random.nextInt(1..6)} damage.")
 					} else {
-						appendLine("**ACCESS_DENIED!**")
+						appendLine("ACCESS_DENIED!")
 					}
 					if (attemptsRemaining == 0) {
-						appendLine("Terminal locked down")
+						appendLine("TERMINAL_LOCKED_DOWN")
 					}
+					append("**")
 				}
 
 				if (attemptsRemaining == 0) {
