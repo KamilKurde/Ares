@@ -23,6 +23,9 @@ data class Terminal(
 			@Suppress("RemoveExplicitTypeArguments")
 			val answers = buildList<Answer> {
 				val firstChar = Random.nextHex()
+
+				fun String.isUnique() = this@buildList.none { (existing, _) -> existing == this }
+
 				fun generateCode(difficulty: Int): String {
 					val generated = buildString {
 						append(firstChar)
@@ -31,15 +34,19 @@ data class Terminal(
 						}
 					}
 
-					val isUnique = none { (existing, _) -> existing == generated }
-
-					return if (isUnique) generated else generateCode(difficulty)
+					return if (generated.isUnique()) generated else generateCode(difficulty)
 				}
 
 				correctAnswer = generateCode(difficulty)
 				add(Answer(correctAnswer, Answer.Type.Correct))
 				repeat(viruses) {
-					add(Answer(generateCode(difficulty), Answer.Type.Virus))
+					var virusValue = correctAnswer
+					do {
+						virusValue = virusValue.toCharArray().apply {
+							set(Random.nextInt(1..virusValue.lastIndex), Random.nextHex())
+						}.concatToString()
+					} while (virusValue.isUnique().not())
+					add(Answer(virusValue, Answer.Type.Virus))
 				}
 				repeat(10 - size) {
 					add(Answer(generateCode(difficulty), Answer.Type.Incorrect))
