@@ -46,41 +46,41 @@ class Terminals {
 
 	suspend fun hack(interaction: ChatInputCommandInteraction) {
 		val name = interaction.command.strings["terminal_name"] ?: return interaction.respondError(
-			tag,
-			"terminal_name not found"
+			tag, "terminal_name not found"
 		)
 		val (terminal, previousResponse) = terminals[name] ?: return interaction.respondError(
-			tag, "terminal with " +
-					"given name not " +
-					"found"
+			tag, "terminal with " + "given name not " + "found"
 		)
 		terminal.hacker?.let {
 			if (interaction.user.id != it) return interaction.respondError(
-				tag,
-				"Expecting <@$it>, and you are not them"
+				tag, "Expecting <@$it>, and you are not them"
 			)
 		}
 
 		val answerIndex =
 			interaction.command.integers["answer"]?.toInt() ?: return interaction.respondError(tag, "answer not found")
 
-		val ansnwer = terminal.answers[answerIndex].second
-
-		when (ansnwer) {
+		when (val answer = terminal.answers[answerIndex].second) {
 			Terminal.AnswerType.Correct -> interaction.respondPublic {
 				content = "**ACCESS_GRANTED!**"
 
 				previousResponse.edit {
-					terminal(name, terminal, settings.images.terminalSuccess)
+					terminal(name, terminal, true)
 				}
 				terminals.remove(name)
 				onTerminalsChange()
 			}
 
-			Terminal.AnswerType.Incorrect -> interaction.respondPublic {
-				val attemptsRemaining = terminal.attemptsRemaining - 1
+			Terminal.AnswerType.Incorrect, Terminal.AnswerType.Virus -> interaction.respondPublic {
+				val attemptsRemaining =
+					(terminal.attemptsRemaining - if (answer == Terminal.AnswerType.Virus) 2 else 1).coerceAtLeast(0)
+				val newTerminal = terminal.copy(attemptsRemaining = attemptsRemaining)
 				content = buildString {
-					appendLine("**ACCESS_DENIED!**")
+					if (answer == Terminal.AnswerType.Virus) {
+						appendLine("ICE detected. You received 1d6 damage. ")
+					} else {
+						appendLine("**ACCESS_DENIED!**")
+					}
 					if (attemptsRemaining == 0) {
 						appendLine("Terminal locked down")
 					}
@@ -88,45 +88,16 @@ class Terminals {
 
 				if (attemptsRemaining == 0) {
 					previousResponse.edit {
-						terminal(name, terminal, settings.images.terminalFailure)
+						terminal(name, newTerminal, false)
 					}
 					terminals.remove(name)
-					return
-				}
-
-				val newTerminal = terminal.copy(attemptsRemaining = attemptsRemaining)
-
-				val newResponse = previousResponse.edit {
-					terminal(name, newTerminal)
-				}
-
-				terminals[name] = newTerminal to newResponse
-			}
-
-			Terminal.AnswerType.Virus -> interaction.respondPublic {
-				val attemptsRemaining = (terminal.attemptsRemaining - 2).coerceAtLeast(0)
-				content = buildString {
-					appendLine("ICE detected. You received 1d6 damage. ")
-					if (attemptsRemaining == 0) {
-						appendLine("Terminal locked down")
+				} else {
+					val newResponse = previousResponse.edit {
+						terminal(name, newTerminal)
 					}
+
+					terminals[name] = newTerminal to newResponse
 				}
-
-				if (attemptsRemaining == 0) {
-					previousResponse.edit {
-						terminal(name, terminal, settings.images.terminalFailure)
-					}
-					terminals.remove(name)
-					return
-				}
-
-				val newTerminal = terminal.copy(attemptsRemaining = attemptsRemaining)
-
-				val newResponse = previousResponse.edit {
-					terminal(name, newTerminal)
-				}
-
-				terminals[name] = newTerminal to newResponse
 			}
 		}
 	}
@@ -138,17 +109,21 @@ class Terminals {
 		onTerminalsChange()
 	}
 
-	private fun MessageBuilder.terminal(name: String, terminal: Terminal, image: String? = null) = embed {
+	private fun MessageBuilder.terminal(name: String, terminal: Terminal, result: Boolean? = null) = embed {
 		title = "CODE BREACH\t\t$name"
 		description = buildText {
 			append("SEQUENCER_")
-			appendLine(terminal.question.toText(color = Text.Color.Red))
+			appendLine(terminal.question.toText(color = if (result == true) Text.Color.Green else Text.Color.Red))
 			appendLine("${terminal.attemptsRemaining} ATTEMPT(S) REMAINING:")
 			appendLine("-".repeat(37))
 			terminal.answers.forEachIndexed { index, (answer) ->
 				appendLine("0x00$index  <(=<(>$$,'};  ${answer.padStart(16, '0')}")
 			}
 		}.toString()
-		this.image = image
+		image = when (result) {
+			true -> settings.images.terminalSuccess
+			false -> settings.images.terminalFailure
+			null -> null
+		}
 	}
 }
