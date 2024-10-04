@@ -70,9 +70,9 @@ class Terminals {
 
 		val answerIndex =
 			interaction.command.integers["answer"]?.toInt() ?: return interaction.respondError(tag, "answer not found")
-
-		when (val answer = terminal.answers[answerIndex].second) {
-			Terminal.AnswerType.Correct -> interaction.respondPublic {
+		val answer = terminal.answers[answerIndex]
+		when (val type = answer.type) {
+			Terminal.Answer.Type.Correct -> interaction.respondPublic {
 				content = "**ACCESS_GRANTED!**"
 
 				previousResponse.edit {
@@ -82,13 +82,13 @@ class Terminals {
 				onTerminalsChange()
 			}
 
-			Terminal.AnswerType.Incorrect, Terminal.AnswerType.Virus -> interaction.respondPublic {
+			Terminal.Answer.Type.Incorrect, Terminal.Answer.Type.Virus -> interaction.respondPublic {
 				val attemptsRemaining =
-					(terminal.attemptsRemaining - if (answer == Terminal.AnswerType.Virus) 2 else 1).coerceAtLeast(0)
+					(terminal.attemptsRemaining - if (type == Terminal.Answer.Type.Virus) 2 else 1).coerceAtLeast(0)
 				val newTerminal = terminal.copy(attemptsRemaining = attemptsRemaining)
 				content = buildString {
 					append("**")
-					if (answer == Terminal.AnswerType.Virus) {
+					if (type == Terminal.Answer.Type.Virus) {
 						appendLine("ICE detected. You received ${Random.nextInt(1..6)} damage.")
 					} else {
 						appendLine("ACCESS_DENIED!")

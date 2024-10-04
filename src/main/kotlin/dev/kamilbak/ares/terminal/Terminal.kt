@@ -8,7 +8,7 @@ data class Terminal(
 	val hacker: Snowflake?,
 	val attemptsRemaining: Int,
 	val question: String,
-	val answers: List<Pair<String, AnswerType>>,
+	val answers: List<Answer>,
 ) {
 	companion object {
 		fun fromCommand(
@@ -21,7 +21,7 @@ data class Terminal(
 			val correctAnswer: String
 
 			@Suppress("RemoveExplicitTypeArguments")
-			val answers = buildList<Pair<String, AnswerType>> {
+			val answers = buildList<Answer> {
 				val firstChar = Random.nextHex()
 				fun generateCode(difficulty: Int): String {
 					val generated = buildString {
@@ -37,12 +37,12 @@ data class Terminal(
 				}
 
 				correctAnswer = generateCode(difficulty)
-				add(correctAnswer to AnswerType.Correct)
+				add(Answer(correctAnswer, Answer.Type.Correct))
 				repeat(viruses) {
-					add(generateCode(difficulty) to AnswerType.Virus)
+					add(Answer(generateCode(difficulty), Answer.Type.Virus))
 				}
 				repeat(10 - size) {
-					add(generateCode(difficulty) to AnswerType.Incorrect)
+					add(Answer(generateCode(difficulty), Answer.Type.Incorrect))
 				}
 			}.shuffled()
 
@@ -62,9 +62,11 @@ data class Terminal(
 		private fun Random.nextHex() = nextInt(0..15).toString(16).uppercase().first()
 	}
 
-	enum class AnswerType {
-		Correct,
-		Incorrect,
-		Virus,
+	data class Answer(val value: String, val type: Type) {
+		enum class Type {
+			Correct,
+			Incorrect,
+			Virus,
+		}
 	}
 }
