@@ -68,7 +68,7 @@ class Terminals {
 
 		when (ansnwer) {
 			Terminal.AnswerType.Correct -> interaction.respondPublic {
-				content = "Access granted"
+				content = "**ACCESS_GRANTED!**"
 
 				previousResponse.edit {
 					terminal(name, terminal, settings.images.terminalSuccess)
@@ -80,7 +80,7 @@ class Terminals {
 			Terminal.AnswerType.Incorrect -> interaction.respondPublic {
 				val attemptsRemaining = terminal.attemptsRemaining - 1
 				content = buildString {
-					appendLine("Access denied")
+					appendLine("**ACCESS_DENIED!**")
 					if (attemptsRemaining == 0) {
 						appendLine("Terminal locked down")
 					}
