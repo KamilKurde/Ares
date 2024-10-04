@@ -34,15 +34,23 @@ class Terminals {
 			tag,
 			"Creating terminal for ${hacker?.username}, with difficulty $difficulty, unknown $unknowns and viruses $viruses"
 		)
-		val terminal = Terminal.fromCommand(hacker?.id, difficulty, unknowns, viruses, attempts)
 
-		val response = interaction.respondPublic {
-			terminal(name, terminal)
+		try {
+			val terminal = Terminal.fromCommand(hacker?.id, difficulty, unknowns, viruses, attempts)
+
+			val response = interaction.respondPublic {
+				terminal(name, terminal)
+			}
+
+			terminals[name] = terminal to response
+
+			onTerminalsChange()
+		} catch (_: StackOverflowError) {
+			interaction.respondError(
+				tag,
+				"Error while creating terminal, could not generate answers satisfying all constrains"
+			)
 		}
-
-		terminals[name] = terminal to response
-
-		onTerminalsChange()
 	}
 
 	suspend fun hack(interaction: ChatInputCommandInteraction) {

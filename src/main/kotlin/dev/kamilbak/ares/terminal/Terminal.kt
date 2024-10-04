@@ -1,6 +1,8 @@
 package dev.kamilbak.ares.terminal
 
 import dev.kord.common.entity.Snowflake
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 data class Terminal(
 	val hacker: Snowflake?,
@@ -20,10 +22,12 @@ data class Terminal(
 
 			@Suppress("RemoveExplicitTypeArguments")
 			val answers = buildList<Pair<String, AnswerType>> {
+				val firstChar = Random.nextHex()
 				fun generateCode(difficulty: Int): String {
 					val generated = buildString {
-						repeat(difficulty) {
-							append((0..15).random().toString(16).uppercase())
+						append(firstChar)
+						repeat(difficulty - 1) {
+							append(Random.nextHex())
 						}
 					}
 
@@ -46,7 +50,7 @@ data class Terminal(
 		}
 
 		private fun String.obfuscate(chars: Int): String {
-			val indicesToReplace = (0..lastIndex).shuffled().take(chars)
+			val indicesToReplace = (1..lastIndex).shuffled().take(chars)
 
 			return toCharArray().apply {
 				indicesToReplace.forEach { index ->
@@ -54,6 +58,8 @@ data class Terminal(
 				}
 			}.concatToString()
 		}
+
+		private fun Random.nextHex() = nextInt(0..15).toString(16).uppercase().first()
 	}
 
 	enum class AnswerType {
