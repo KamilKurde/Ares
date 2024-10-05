@@ -7,12 +7,13 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.Optional
 import dev.kord.core.Kord
 import dev.kord.core.behavior.interaction.respondPublic
-import dev.kord.core.entity.application.ApplicationCommand
 import dev.kord.core.entity.application.GuildChatInputCommand
 import dev.kord.core.entity.interaction.SubCommand
 import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
 import dev.kord.core.on
 import dev.kord.rest.builder.interaction.*
+import dev.kord.rest.request.KtorRequestException
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.runBlocking
 import org.slf4j.MarkerFactory
 import java.io.File
@@ -42,8 +43,14 @@ class Bot(private val guildId: Snowflake) {
 	}
 
 	private suspend fun Kord.removeOldCommands() {
-		getGlobalApplicationCommands().collect(ApplicationCommand::delete)
-		getGuildApplicationCommands(guildId).collect(ApplicationCommand::delete)
+		val tag = MarkerFactory.getMarker("Bot#removeOldCommands")
+		merge(getGlobalApplicationCommands(), getGuildApplicationCommands(guildId)).collect {
+			try {
+				it.delete()
+			} catch (_: KtorRequestException) {
+				logger.error(tag, "Failed to remove command ${it.name}")
+			}
+		}
 	}
 
 	private suspend fun onCommand(command: ChatInputCommandInteractionCreateEvent) {
@@ -63,11 +70,11 @@ class Bot(private val guildId: Snowflake) {
 				combat.edit(command.interaction)
 
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "end" -> {
-				File(".combat.ares").delete()
-				combat = Combat()
 				command.interaction.respondPublic {
 					content = "**COMBAT ENDED_**"
 				}
+				File(".combat.ares").delete()
+				combat = Combat()
 				command.kord.removeOldCommands()
 				command.kord.setUpCommands()
 			}
