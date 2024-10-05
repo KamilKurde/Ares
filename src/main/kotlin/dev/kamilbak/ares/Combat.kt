@@ -122,7 +122,7 @@ class Combat {
 							}
 							append(" remaining ${settings.emojis.attack.orEmpty()}")
 						} else {
-							append("target eliminated ${settings.emojis.kill.orEmpty()}")
+							append("target flatlined ${settings.emojis.kill.orEmpty()}")
 						}
 					}
 
@@ -237,7 +237,7 @@ class Combat {
 							else -> "${target.currentArmor.toStat()}/${target.maxArmor.toStat()}".toText(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
 						}
 						value =
-							("status[".toText() + status + "]\nhp    [" + hpStats + "]\nap    [" + apStats + "]").toString()
+							("st [".toText() + status + "]\nhp [" + hpStats + "]\nap [" + apStats + "]").toString()
 					}
 				}
 
