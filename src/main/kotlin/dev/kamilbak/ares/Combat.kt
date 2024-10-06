@@ -165,6 +165,18 @@ class Combat {
 		}
 	}
 
+	suspend fun end(interaction: ChatInputCommandInteraction) {
+		targets.clear()
+		footerImage = null
+		name = ""
+		isStarted = false
+		File(".combat.ares").delete()
+		onTargetsChange()
+		interaction.respondPublic {
+			content = "**COMBAT ENDED_**"
+		}
+	}
+
 	suspend fun heal(interaction: ChatInputCommandInteraction) {
 		val tag = MarkerFactory.getMarker("Combat#heal")
 

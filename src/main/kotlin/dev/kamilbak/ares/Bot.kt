@@ -6,7 +6,6 @@ import dev.kord.common.entity.Choice
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.Optional
 import dev.kord.core.Kord
-import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.entity.application.GuildChatInputCommand
 import dev.kord.core.entity.interaction.SubCommand
 import dev.kord.core.event.interaction.ChatInputCommandInteractionCreateEvent
@@ -16,7 +15,6 @@ import dev.kord.rest.request.KtorRequestException
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.runBlocking
 import org.slf4j.MarkerFactory
-import java.io.File
 
 class Bot(private val guildId: Snowflake) {
 	private var combat: Combat = Combat()
@@ -69,15 +67,8 @@ class Bot(private val guildId: Snowflake) {
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "edit" ->
 				combat.edit(command.interaction)
 
-			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "end" -> {
-				command.interaction.respondPublic {
-					content = "**COMBAT ENDED_**"
-				}
-				File(".combat.ares").delete()
-				combat = Combat()
-				command.kord.removeOldCommands()
-				command.kord.setUpCommands()
-			}
+			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "end" ->
+				combat.end(command.interaction)
 
 			invoker.rootName == "combat" && invoker is SubCommand && invoker.name == "start" ->
 				combat.start(command.interaction)
@@ -99,6 +90,7 @@ class Bot(private val guildId: Snowflake) {
 		val healCommand = registerCommand("heal", "Heals a target") {
 			healCommandOptions(emptyList())
 		}
+
 		combat.registerOnTargetChange {
 			attackCommand.edit {
 				attackCommandOptions(it)
