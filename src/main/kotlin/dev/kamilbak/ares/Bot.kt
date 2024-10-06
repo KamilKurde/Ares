@@ -163,6 +163,9 @@ class Bot(private val guildId: Snowflake) {
 			required = true
 			setAllowedChoices(targets)
 		}
+		string("attacker_name", "Name of the attacker") {
+			required = false
+		}
 		integer("damage", "HP to deduct from target") {
 			required = false
 			minValue = 1
@@ -265,6 +268,9 @@ class Bot(private val guildId: Snowflake) {
 			required = true
 			minValue = 1
 			maxValue = 100
+		}
+		string("healer_name", "Name of the attacker") {
+			required = false
 		}
 	}
 

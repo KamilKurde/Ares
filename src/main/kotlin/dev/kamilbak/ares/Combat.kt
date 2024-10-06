@@ -64,6 +64,7 @@ class Combat {
 
 		val targetName =
 			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
+		val attackerName = interaction.command.strings["attacker_name"]
 		val target = targets[targetName]?.takeUnless { it.currentHp <= 0 } ?: return interaction.respondError(
 			tag,
 			"target_name must point to a living target"
@@ -91,12 +92,16 @@ class Combat {
 
 		interaction.respondPublic {
 			content = buildString {
-				append("<@${interaction.user.id.value}> ")
+				if (attackerName != null) {
+					append(attackerName)
+				} else {
+					append("<@${interaction.user.id.value}>")
+				}
 				append(
 					when {
-						actuallyDelt > 0 -> "delt"
-						actuallyDelt == 0 -> "blocked incoming"
-						else -> "neglected incoming"
+						actuallyDelt > 0 -> " delt"
+						actuallyDelt == 0 -> " blocked incoming"
+						else -> " neglected incoming"
 					}
 				)
 
@@ -191,6 +196,7 @@ class Combat {
 
 		val targetName =
 			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
+		val healerName = interaction.command.strings["healer_name"]
 		val target = targets[targetName] ?: return interaction.respondError(
 			tag,
 			"target_name must point to an actual target"
@@ -202,9 +208,13 @@ class Combat {
 
 		interaction.respondPublic {
 			content = buildString {
+				if (healerName != null) {
+					append(healerName)
+				} else {
+					append("<@${interaction.user.id.value}>")
+				}
 				append(
-					"<@${interaction.user.id.value}> healed ${modified.currentHp - target.currentHp} " +
-							"health of **$targetName** hp[${modified.currentHp}/${modified.maxHp}] remaining"
+					" healed ${modified.currentHp - target.currentHp} health of **$targetName** hp[${modified.currentHp}/${modified.maxHp}] remaining"
 				)
 			}
 		}
