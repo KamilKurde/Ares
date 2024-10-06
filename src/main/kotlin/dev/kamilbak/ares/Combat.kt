@@ -29,6 +29,7 @@ class Combat {
 		mutableMapOf()
 	}
 	private var onTargetsChange: suspend () -> Unit = {}
+	private var liveStatus: PublicMessageInteractionResponseBehavior? = null
 	private var footerImage: String? = null
 	private var name: String = ""
 	private var isStarted: Boolean = false
@@ -53,6 +54,7 @@ class Combat {
 		interaction.respondEphemeral {
 			content = "targets added: ${targets[targetName]}".also { logger.info(tag, it) }
 		}
+		liveStatus?.edit { statusEmbed() }
 	}
 
 	suspend fun attack(interaction: ChatInputCommandInteraction) {
@@ -131,6 +133,8 @@ class Combat {
 				}
 			}
 		}
+
+		liveStatus?.edit { statusEmbed() }
 	}
 
 	suspend fun edit(interaction: ChatInputCommandInteraction) {
@@ -163,6 +167,8 @@ class Combat {
 		interaction.respondEphemeral {
 			content = if (modified != null) "targets modified: $modified" else "target $targetName not found"
 		}
+
+		liveStatus?.edit { statusEmbed() }
 	}
 
 	suspend fun end(interaction: ChatInputCommandInteraction) {
@@ -170,6 +176,7 @@ class Combat {
 		footerImage = null
 		name = ""
 		isStarted = false
+		liveStatus = null
 		File(".combat.ares").delete()
 		onTargetsChange()
 		interaction.respondPublic {
@@ -201,6 +208,8 @@ class Combat {
 				)
 			}
 		}
+
+		liveStatus?.edit { statusEmbed() }
 	}
 
 	fun save() {
@@ -218,45 +227,14 @@ class Combat {
 			}
 			return
 		}
-		val statusEmbed: MessageBuilder.() -> Unit = {
-			embed {
-				color = Color(255, 0, 0)
-				author {
-					icon = settings.embedIcon
-					name = this@Combat.name
-				}
-				targets.forEach { (targetName, target) ->
-					field {
-						inline = true
-						name = targetName
-						val aliveColor = when {
-							target.isFriendly -> Text.Color.Blue
-							target.maxHp >= settings.bossHpLevel -> Text.Color.Pink
-							else -> Text.Color.Green
-						}
 
-						val status = when {
-							target.isHidden -> "UNKNOWN".toText(color = Text.Color.Yellow)
-							target.currentHp > 0 -> "ONLINE_".toText(color = aliveColor)
-							else -> "OFFLINE".toText(color = Text.Color.Red)
-						}
-						val hpStats = when {
-							target.isHidden -> "???/???".toText(color = Text.Color.Yellow)
-							else -> "${target.currentHp.toStat()}/${target.maxHp.toStat()}".toText(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
-						}
-						val apStats = when {
-							target.isHidden -> "???/???".toText(color = Text.Color.Yellow)
-							else -> "${target.currentArmor.toStat()}/${target.maxArmor.toStat()}".toText(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
-						}
-						value =
-							("st [".toText() + status + "]\nhp [" + hpStats + "]\nap [" + apStats + "]").toString()
-					}
-				}
+		val isLive = interaction.command.booleans["live"] ?: false
 
-				image = footerImage
-			}
+		val response = originalResponse?.edit { statusEmbed() } ?: interaction.respondPublic { statusEmbed() }
+
+		if (isLive) {
+			liveStatus = response
 		}
-		originalResponse?.edit(statusEmbed) ?: interaction.respondPublic(statusEmbed)
 	}
 
 	suspend fun start(interaction: ChatInputCommandInteraction) {
@@ -298,6 +276,8 @@ class Combat {
 		interaction.respondEphemeral {
 			content = if (wasRemoved) "target removed: $targetName" else "target $targetName not found"
 		}
+
+		liveStatus?.edit { statusEmbed() }
 	}
 
 	suspend fun registerOnTargetChange(register: suspend (targetNames: List<String>) -> Unit) {
@@ -310,4 +290,41 @@ class Combat {
 	private fun roll(dice: Int) = List(dice) { Random.nextInt(1..6) }
 
 	private fun Int.toStat() = toString().padStart(3, '0')
+
+	private fun MessageBuilder.statusEmbed() = embed {
+		color = Color(255, 0, 0)
+		author {
+			icon = settings.embedIcon
+			name = this@Combat.name
+		}
+		targets.forEach { (targetName, target) ->
+			field {
+				inline = true
+				name = targetName
+				val aliveColor = when {
+					target.isFriendly -> Text.Color.Blue
+					target.maxHp >= settings.bossHpLevel -> Text.Color.Pink
+					else -> Text.Color.Green
+				}
+
+				val status = when {
+					target.isHidden -> "UNKNOWN".toText(color = Text.Color.Yellow)
+					target.currentHp > 0 -> "ONLINE_".toText(color = aliveColor)
+					else -> "OFFLINE".toText(color = Text.Color.Red)
+				}
+				val hpStats = when {
+					target.isHidden -> "???/???".toText(color = Text.Color.Yellow)
+					else -> "${target.currentHp.toStat()}/${target.maxHp.toStat()}".toText(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
+				}
+				val apStats = when {
+					target.isHidden -> "???/???".toText(color = Text.Color.Yellow)
+					else -> "${target.currentArmor.toStat()}/${target.maxArmor.toStat()}".toText(color = if (target.currentHp > 0) aliveColor else Text.Color.Red)
+				}
+				value =
+					("st [".toText() + status + "]\nhp [" + hpStats + "]\nap [" + apStats + "]").toString()
+			}
+		}
+
+		image = footerImage
+	}
 }

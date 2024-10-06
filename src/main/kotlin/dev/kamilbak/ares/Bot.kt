@@ -150,7 +150,12 @@ class Bot(private val guildId: Snowflake) {
 				terminateCommandOptions(it)
 			}
 		}
-		registerCommand("status", "Shows status of a combat")
+		registerCommand("status", "Shows status of a combat") {
+			boolean("live", "Creates a status that will update whenever damage is delt") {
+				required = false
+				default = false
+			}
+		}
 	}
 
 	private fun RootInputChatBuilder.attackCommandOptions(targets: List<String>) {
