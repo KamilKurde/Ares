@@ -57,6 +57,7 @@ class Bot(private val guildId: Snowflake) {
 		val invoker = command.interaction.command
 		logger.info(MarkerFactory.getMarker("Bot#onCommand"), "Parsing a ${invoker.rootName} command")
 		when {
+			invoker.rootName == "duel" -> duels.duel(command.interaction)
 			invoker.rootName == "versus" -> duels.versus(command.interaction)
 			invoker.rootName == "terminal" -> terminals.create(command.interaction)
 			invoker.rootName == "terminate" -> terminals.terminate(command.interaction)
@@ -114,10 +115,20 @@ class Bot(private val guildId: Snowflake) {
 				required = true
 				maxLength = 20
 			}
-			integer("bonus", "Additional bonus to add to player rolls") {
+			integer("bonus", "Additional bonus to add to opponent rolls") {
 				required = false
 				minValue = 1
 				maxValue = 100
+			}
+		}
+
+		val duelCommand = registerCommand("duel", "Partakes in a duel") {
+			duelCommandOptions(emptyList())
+		}
+
+		duels.registerOnDuelsChange {
+			duelCommand.edit {
+				duelCommandOptions(it)
 			}
 		}
 
@@ -262,6 +273,18 @@ class Bot(private val guildId: Snowflake) {
 				required = true
 				setAllowedChoices(targets)
 			}
+		}
+	}
+
+	private fun RootInputChatBuilder.duelCommandOptions(targets: List<String>) {
+		string("opponent", "Name of the opponent") {
+			required = true
+			setAllowedChoices(targets)
+		}
+		integer("bonus", "Bonus to add to player roll") {
+			required = false
+			minValue = 1
+			maxValue = 100
 		}
 	}
 

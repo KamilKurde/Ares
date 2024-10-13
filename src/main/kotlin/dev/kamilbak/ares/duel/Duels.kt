@@ -3,6 +3,7 @@ package dev.kamilbak.ares.duel
 import dev.kamilbak.ares.util.*
 import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
+import dev.kord.core.behavior.interaction.response.edit
 import dev.kord.core.entity.effectiveName
 import dev.kord.core.entity.interaction.ChatInputCommandInteraction
 import dev.kord.rest.builder.message.MessageBuilder
@@ -17,6 +18,70 @@ class Duels {
 	private val duels: MutableMap<String, Pair<Duel, MessageInteractionResponseBehavior>> = mutableMapOf()
 
 	private var onDuelsChange: suspend () -> Unit = {}
+
+	suspend fun duel(interaction: ChatInputCommandInteraction) {
+		val tag = MarkerFactory.getMarker("Duels#duel")
+
+		val opponent = interaction.command.strings["opponent"]
+			?: return interaction.respondError(tag, "opponent not found")
+		val playerBonus = interaction.command.integers["bonus"]?.toInt() ?: 0
+
+		val (duel, originalResponse) = duels[opponent]
+			?: return interaction.respondError(tag, "Duel with $opponent not found")
+		if (duel.player.id != interaction.user.id) {
+			return interaction.respondError(
+				tag,
+				"This duel is between $opponent and <@${duel.player.id.value}>, not you"
+			)
+		}
+
+		val playerRoll = Random.nextInt(1, 10)
+		val opponentRoll = Random.nextInt(1, 10)
+
+		val playerScore = playerRoll + playerBonus
+		val opponentScore = opponentRoll + duel.opponentBonus
+
+		interaction.respondPublic {
+			content = buildString {
+				append("<@${duel.player.id.value}> rolled ")
+				append(playerRoll)
+				if (playerBonus > 0) {
+					append(" (+$playerBonus)")
+				}
+				append(" and $opponent rolled ")
+				append(opponentRoll)
+				if (duel.opponentBonus > 0) {
+					append(" (+${duel.opponentBonus})")
+				}
+				appendLine()
+				appendLine(
+					when {
+						playerScore > opponentScore ->
+							"<@${duel.player.id.value}> won by ${playerScore - opponentScore} points"
+
+						playerScore < opponentScore ->
+							"$opponent won by ${opponentScore - playerScore} points"
+
+						else -> "Draw"
+					}
+				)
+			}
+		}
+
+		val newDuel = duel.copy(playerScore = (duel.playerScore + playerScore - opponentScore).coerceIn(0..100))
+
+		val newResponse = originalResponse.edit {
+			duel(newDuel)
+		}
+
+		if (newDuel.playerScore == 0 || newDuel.playerScore == 100) {
+			duels.remove(opponent)
+			onDuelsChange()
+			return
+		}
+
+		duels[opponent] = newDuel to newResponse
+	}
 
 	suspend fun versus(interaction: ChatInputCommandInteraction) {
 		val tag = MarkerFactory.getMarker("Duels#versus")
@@ -37,6 +102,12 @@ class Duels {
 		duels[opponent] = duel to response
 
 		onDuelsChange()
+	}
+
+	fun registerOnDuelsChange(register: suspend (targetNames: List<String>) -> Unit) {
+		onDuelsChange = {
+			register(duels.keys.sorted())
+		}
 	}
 
 	private fun MessageBuilder.duel(duel: Duel) = embed {
