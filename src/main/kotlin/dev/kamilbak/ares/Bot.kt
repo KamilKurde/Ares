@@ -1,5 +1,6 @@
 package dev.kamilbak.ares
 
+import dev.kamilbak.ares.duel.Duels
 import dev.kamilbak.ares.model.settings
 import dev.kamilbak.ares.terminal.Terminals
 import dev.kord.common.entity.Choice
@@ -17,7 +18,8 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.MarkerFactory
 
 class Bot(private val guildId: Snowflake) {
-	private var combat: Combat = Combat()
+	private val combat: Combat = Combat()
+	private val duels: Duels = Duels()
 	private val terminals: Terminals = Terminals()
 
 	suspend fun initialize(kord: Kord) {
@@ -55,6 +57,7 @@ class Bot(private val guildId: Snowflake) {
 		val invoker = command.interaction.command
 		logger.info(MarkerFactory.getMarker("Bot#onCommand"), "Parsing a ${invoker.rootName} command")
 		when {
+			invoker.rootName == "versus" -> duels.versus(command.interaction)
 			invoker.rootName == "terminal" -> terminals.create(command.interaction)
 			invoker.rootName == "terminate" -> terminals.terminate(command.interaction)
 			invoker.rootName == "hack" -> terminals.hack(command.interaction)
@@ -102,6 +105,22 @@ class Bot(private val guildId: Snowflake) {
 				healCommandOptions(it)
 			}
 		}
+
+		registerCommand("versus", "Creates a duel") {
+			user("player", "Player which partakes in a duel") {
+				required = true
+			}
+			string("opponent", "Opponent which partakes in a duel") {
+				required = true
+				maxLength = 20
+			}
+			integer("bonus", "Additional bonus to add to player rolls") {
+				required = false
+				minValue = 1
+				maxValue = 100
+			}
+		}
+
 		val revealCommand = registerCommand("reveal", "Reveals one character in sequencer by giving up one attempt") {
 			revealCommandOptions(emptyList())
 		}

@@ -76,10 +76,6 @@ fun buildText(build: TextBuilder.() -> Unit): Text {
 		override fun append(text: Text) {
 			accumulated += text
 		}
-
-		override fun append(text: String) {
-			accumulated += text
-		}
 	}
 
 	builder.build()
@@ -90,6 +86,9 @@ fun buildText(build: TextBuilder.() -> Unit): Text {
 interface TextBuilder {
 	fun append(text: Text)
 	fun appendLine(text: Text) = append(text + "\n")
-	fun append(text: String)
-	fun appendLine(text: String) = append(text + "\n")
+	fun append(string: String, decoration: Text.Decoration = Text.Decoration.Normal, color: Text.Color? = null) =
+		append(string.toText(decoration, color))
+
+	fun appendLine(string: String, decoration: Text.Decoration = Text.Decoration.Normal, color: Text.Color? = null) =
+		append(string + "\n", decoration, color)
 }
