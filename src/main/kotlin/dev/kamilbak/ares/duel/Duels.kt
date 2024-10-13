@@ -3,6 +3,7 @@ package dev.kamilbak.ares.duel
 import dev.kamilbak.ares.util.*
 import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
+import dev.kord.core.entity.effectiveName
 import dev.kord.core.entity.interaction.ChatInputCommandInteraction
 import dev.kord.rest.builder.message.MessageBuilder
 import dev.kord.rest.builder.message.embed
@@ -41,7 +42,9 @@ class Duels {
 	private fun MessageBuilder.duel(duel: Duel) = embed {
 		title = "VERSUS"
 		description = buildText {
-			val longerNameLength = maxOf(duel.player.username.length, duel.oponent.length).coerceAtLeast(9)
+			val longerNameLength = maxOf(duel.player.effectiveName.length, duel.oponent.length).coerceAtLeast(9)
+			val segments = (longerNameLength * 2) + 4 - (2 * 6)
+
 			append(
 				duel.oponent.padStart(longerNameLength),
 				color = Text.Color.Red,
@@ -50,25 +53,15 @@ class Duels {
 			append(" v", color = Text.Color.Red)
 			append("s ", color = Text.Color.Blue)
 			appendLine(
-				duel.player.username.padEnd(longerNameLength),
+				duel.player.effectiveName.padEnd(longerNameLength),
 				color = Text.Color.Blue,
 				decoration = Text.Decoration.Bold
 			)
 			append((100 - duel.playerScore).toString().padStart(3, '0') + "%", color = Text.Color.Red)
-			val (paddingBefore, paddingAfter) = run {
-				val totalRowWidth = longerNameLength * 2 + 4
-				val widthUsedInScoreRow = 4 * 2 + 10 + 2
-
-				val paddingPerSide = (totalRowWidth - widthUsedInScoreRow).toFloat() / 2
-
-				floor(paddingPerSide).toInt() to ceil(paddingPerSide).toInt()
-			}
-			append(" ".repeat(paddingBefore))
-			append("[", color = Text.Color.Red)
-			append("=".repeat(floor((100f - duel.playerScore) / 10).toInt()), color = Text.Color.Red)
-			append("=".repeat(ceil(duel.playerScore.toFloat() / 10).toInt()), color = Text.Color.Blue)
-			append("]", color = Text.Color.Blue)
-			append(" ".repeat(paddingAfter))
+			append(" [", color = Text.Color.Red)
+			append("=".repeat(floor((100f - duel.playerScore) / 100 * segments).toInt()), color = Text.Color.Red)
+			append("=".repeat(ceil(duel.playerScore.toFloat() / 100 * segments).toInt()), color = Text.Color.Blue)
+			append("] ", color = Text.Color.Blue)
 			append(duel.playerScore.toString().padStart(3, '0') + "%", color = Text.Color.Blue)
 		}.toString()
 	}
