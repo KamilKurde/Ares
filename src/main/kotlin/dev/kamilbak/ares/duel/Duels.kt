@@ -1,5 +1,6 @@
 package dev.kamilbak.ares.duel
 
+import dev.kamilbak.ares.model.settings
 import dev.kamilbak.ares.util.*
 import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
@@ -111,7 +112,10 @@ class Duels {
 	}
 
 	private fun MessageBuilder.duel(duel: Duel) = embed {
-		title = "VERSUS"
+		author {
+			icon = settings.icons.duelEmbed
+			name = "VERSUS"
+		}
 		description = buildText {
 			val longerNameLength = maxOf(duel.player.effectiveName.length, duel.oponent.length).coerceAtLeast(9)
 			val segments = (longerNameLength * 2) + 4 - (2 * 6)

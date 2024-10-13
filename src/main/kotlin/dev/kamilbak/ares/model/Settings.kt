@@ -9,16 +9,25 @@ import java.io.File
 /**
  * @property maxHp Maximum amount of HP a target can have
  * @property bossHpLevel Amount of HP a target should have to be considered a "boss" and be coloured differently
- * @property embedIcon Icon to use before combat name in status
  * @property emojis Emojis to use in text messages
  */
 @Serializable
 data class Settings(
 	val maxHp: Int = 100,
 	val bossHpLevel: Int = 100,
-	val embedIcon: String? = null,
+	val icons: Icons = Icons(),
 	val emojis: Emojis = Emojis(),
 	val images: Images = Images(),
+)
+
+/**
+ * @property combatEmbed Icon to use before combat name in status
+ * @property duelEmbed Icon to use in versus embed
+ */
+@Serializable
+data class Icons(
+	val combatEmbed: String? = null,
+	val duelEmbed: String? = null,
 )
 
 /**

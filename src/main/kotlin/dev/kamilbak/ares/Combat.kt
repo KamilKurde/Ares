@@ -304,7 +304,7 @@ class Combat {
 	private fun MessageBuilder.statusEmbed() = embed {
 		color = Color(255, 0, 0)
 		author {
-			icon = settings.embedIcon
+			icon = settings.icons.combatEmbed
 			name = this@Combat.name
 		}
 		targets.forEach { (targetName, target) ->
