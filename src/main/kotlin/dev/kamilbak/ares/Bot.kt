@@ -224,6 +224,9 @@ class Bot(private val guildId: Snowflake) {
 			required = false
 			default = false
 		}
+		string("catch_phrase", "Text to use if attack ended in target elimination") {
+			required = false
+		}
 	}
 
 	private fun RootInputChatBuilder.combatCommandOptions(targets: List<String>) {

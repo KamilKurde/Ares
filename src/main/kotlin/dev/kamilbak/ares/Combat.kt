@@ -75,18 +75,14 @@ class Combat {
 		val dice = interaction.command.integers["roll"]?.toInt()
 
 		val isNonLethal = interaction.command.booleans["nonlethal"] ?: false
+		val catchPhrase = interaction.command.strings["catch_phrase"]
 
 		if (damage == null && dice == null) return interaction.respondError(tag, "Neither damage nor roll was found")
-		if (damage != null && dice != null) return interaction.respondError(
-			tag,
-			"Only damage or roll can be specified at the same time"
-		)
 
 		val rolled = dice?.let(::roll)
 		val wasCritical = (rolled?.count { it == 6 } ?: 0) >= 2
 
-		val delt = damage ?: rolled?.sum()?.let { if (wasCritical) it + 5 else it }
-		?: throw IllegalStateException("Space particles detected")
+		val delt = (damage ?: 0) + (rolled?.sum()?.let { if (wasCritical) it + 5 else it } ?: 0)
 		val armorToDeduct = when (damageType) {
 			DamageType.Melee -> target.currentArmor / 2
 			DamageType.Projectile -> target.currentArmor
@@ -144,6 +140,9 @@ class Combat {
 							append("target unconscious ${settings.emojis.kill.orEmpty()}")
 						} else {
 							append("target **FLATLINED_**${settings.emojis.kill.orEmpty()}")
+							catchPhrase?.let {
+								append("\n*$it*")
+							}
 						}
 					}
 
