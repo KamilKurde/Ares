@@ -220,6 +220,10 @@ class Bot(private val guildId: Snowflake) {
 			minValue = 1
 			maxValue = 10
 		}
+		boolean("nonlethal", "Whether damage should be non-lethal") {
+			required = false
+			default = false
+		}
 	}
 
 	private fun RootInputChatBuilder.combatCommandOptions(targets: List<String>) {

@@ -74,6 +74,8 @@ class Combat {
 		val damage = interaction.command.integers["damage"]?.toInt()
 		val dice = interaction.command.integers["roll"]?.toInt()
 
+		val isNonLethal = interaction.command.booleans["nonlethal"] ?: false
+
 		if (damage == null && dice == null) return interaction.respondError(tag, "Neither damage nor roll was found")
 		if (damage != null && dice != null) return interaction.respondError(
 			tag,
@@ -138,8 +140,10 @@ class Combat {
 								append(" ap[${modified.currentArmor}/${modified.maxArmor}]")
 							}
 							append(" remaining ${settings.emojis.attack.orEmpty()}")
+						} else if (isNonLethal) {
+							append("target unconscious ${settings.emojis.kill.orEmpty()}")
 						} else {
-							append("target flatlined ${settings.emojis.kill.orEmpty()}")
+							append("target **FLATLINED_**${settings.emojis.kill.orEmpty()}")
 						}
 					}
 
