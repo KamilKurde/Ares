@@ -92,10 +92,11 @@ class Duels {
 		val opponent = interaction.command.strings["opponent"]
 			?: return interaction.respondError(tag, "opponent not found")
 		val bonus = interaction.command.integers["bonus"]?.toInt() ?: 0
+		val footerImage = interaction.command.attachments.values.firstOrNull { it.isImage }?.url
 
 		if (opponent in duels.keys) return interaction.respondError(tag, "opponent already partakes in a duel")
 
-		val duel = Duel(player, opponent, bonus + Random.nextInt(1..10))
+		val duel = Duel(player, opponent, bonus + Random.nextInt(1..10), footerImage)
 		val response = interaction.respondPublic {
 			duel(duel)
 		}
@@ -158,5 +159,6 @@ class Duels {
 				append("$victor won the duel", color = color)
 			}
 		}.toString()
+		image = duel.footerImage
 	}
 }

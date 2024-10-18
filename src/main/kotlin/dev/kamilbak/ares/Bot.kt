@@ -120,6 +120,9 @@ class Bot(private val guildId: Snowflake) {
 				minValue = 1
 				maxValue = 100
 			}
+			attachment("image", "Image to be used in status responses") {
+				required = false
+			}
 		}
 
 		val duelCommand = registerCommand("duel", "Partakes in a duel") {

@@ -7,5 +7,6 @@ data class Duel(
 	val player: User,
 	val oponent: String,
 	val opponentBonus: Int,
-	val playerScore: @Range(from = 0, to = 100) Int = 50
+	val footerImage: String?,
+	val playerScore: @Range(from = 0, to = 100) Int = 50,
 )
