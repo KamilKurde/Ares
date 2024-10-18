@@ -79,7 +79,10 @@ class Combat {
 		)
 
 		val rolled = dice?.let(::roll)
-		val delt = damage ?: rolled?.sum() ?: throw IllegalStateException("Space particles detected")
+		val wasCritical = (rolled?.count { it == 6 } ?: 0) >= 2
+
+		val delt = damage ?: rolled?.sum()?.let { if (wasCritical) it + 5 else 5 }
+		?: throw IllegalStateException("Space particles detected")
 		val actuallyDelt = delt - target.currentArmor
 
 		val modified = target.copy(
@@ -105,12 +108,12 @@ class Combat {
 					}
 				)
 
-				val wasCritical = (rolled?.count { it == 6 } ?: 0) >= 2
 				if (wasCritical) {
 					append(" critical")
 				}
 				if (rolled != null) {
-					append(rolled.joinToString(separator = "+", prefix = " ||(", postfix = ")||"))
+					append(rolled.let { if (wasCritical) it + 5 else it }
+						.joinToString(separator = "+", prefix = " ||(", postfix = ")||"))
 				}
 
 				when {
