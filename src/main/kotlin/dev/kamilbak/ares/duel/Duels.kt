@@ -132,12 +132,31 @@ class Duels {
 				color = Text.Color.Blue,
 				decoration = Text.Decoration.Bold
 			)
-			append((100 - duel.playerScore).toString().padStart(3, '0') + "%", color = Text.Color.Red)
-			append(" [", color = Text.Color.Red)
-			append("=".repeat(floor((100f - duel.playerScore) / 100 * segments).toInt()), color = Text.Color.Red)
-			append("=".repeat(ceil(duel.playerScore.toFloat() / 100 * segments).toInt()), color = Text.Color.Blue)
-			append("] ", color = Text.Color.Blue)
-			append(duel.playerScore.toString().padStart(3, '0') + "%", color = Text.Color.Blue)
+			if (duel.playerScore in 1..99) {
+				append((100 - duel.playerScore).toString().padStart(3, '0') + "%", color = Text.Color.Red)
+				append(" [", color = Text.Color.Red)
+				append("=".repeat(floor((100f - duel.playerScore) / 100 * segments).toInt()), color = Text.Color.Red)
+				append("=".repeat(ceil(duel.playerScore.toFloat() / 100 * segments).toInt()), color = Text.Color.Blue)
+				append("] ", color = Text.Color.Blue)
+				append(duel.playerScore.toString().padStart(3, '0') + "%", color = Text.Color.Blue)
+			} else {
+				val victor: String
+				val color: Text.Color
+				when (duel.playerScore) {
+					100 -> {
+						victor = duel.player.effectiveName
+						color = Text.Color.Blue
+					}
+
+					0 -> {
+						victor = duel.oponent
+						color = Text.Color.Red
+					}
+
+					else -> throw IllegalStateException("Duel is not over yet")
+				}
+				append("$victor won the duel", color = color)
+			}
 		}.toString()
 	}
 }
