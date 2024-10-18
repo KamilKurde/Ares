@@ -203,6 +203,10 @@ class Bot(private val guildId: Snowflake) {
 			required = true
 			setAllowedChoices(targets)
 		}
+		string("damage_type", "Type of the damage this attack deals") {
+			required = true
+			setAllowedChoices(Combat.DamageType.entries.map { it.name })
+		}
 		string("attacker_name", "Name of the attacker") {
 			required = false
 		}

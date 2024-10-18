@@ -64,6 +64,8 @@ class Combat {
 
 		val targetName =
 			interaction.command.strings["target_name"] ?: return interaction.respondError(tag, "target_name not found")
+		val damageType = interaction.command.strings["damage_type"]?.let(DamageType::valueOf)
+			?: return interaction.respondError(tag, "damage_type not found")
 		val attackerName = interaction.command.strings["attacker_name"]
 		val target = targets[targetName]?.takeUnless { it.currentHp <= 0 } ?: return interaction.respondError(
 			tag,
@@ -81,9 +83,14 @@ class Combat {
 		val rolled = dice?.let(::roll)
 		val wasCritical = (rolled?.count { it == 6 } ?: 0) >= 2
 
-		val delt = damage ?: rolled?.sum()?.let { if (wasCritical) it + 5 else 5 }
+		val delt = damage ?: rolled?.sum()?.let { if (wasCritical) it + 5 else it }
 		?: throw IllegalStateException("Space particles detected")
-		val actuallyDelt = delt - target.currentArmor
+		val armorToDeduct = when (damageType) {
+			DamageType.Melee -> target.currentArmor / 2
+			DamageType.Projectile -> target.currentArmor
+			DamageType.Special -> 0
+		}
+		val actuallyDelt = delt - armorToDeduct
 
 		val modified = target.copy(
 			currentHp = (target.currentHp - actuallyDelt.coerceAtLeast(0)).coerceAtLeast(0),
@@ -118,9 +125,9 @@ class Combat {
 
 				when {
 					actuallyDelt > 0 -> {
-						append(" **$actuallyDelt** damage")
+						append(" **$actuallyDelt** ${damageType.name.lowercase()} damage")
 						if (actuallyDelt != delt) {
-							append(" reduced by ${target.currentArmor} armor")
+							append(" reduced by $armorToDeduct armor")
 						}
 						append(" to **$targetName** ")
 						if (modified.currentHp != 0) {
@@ -339,5 +346,11 @@ class Combat {
 		}
 
 		image = footerImage
+	}
+
+	enum class DamageType {
+		Melee,
+		Projectile,
+		Special,
 	}
 }
