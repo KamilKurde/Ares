@@ -2,6 +2,7 @@ package dev.kamilbak.ares.duel
 
 import dev.kamilbak.ares.model.settings
 import dev.kamilbak.ares.util.*
+import dev.kord.common.Color
 import dev.kord.core.behavior.interaction.respondPublic
 import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
 import dev.kord.core.behavior.interaction.response.edit
@@ -19,6 +20,34 @@ class Duels {
 	private val duels: MutableMap<String, Pair<Duel, MessageInteractionResponseBehavior>> = mutableMapOf()
 
 	private var onDuelsChange: suspend () -> Unit = {}
+
+	suspend fun cancel(interaction: ChatInputCommandInteraction) {
+		val tag = MarkerFactory.getMarker("Duels#cancel")
+
+		val opponent = interaction.command.strings["opponent"]
+			?: return interaction.respondError(tag, "opponent not found")
+
+		val duelAndVersus = duels.remove(opponent)
+
+		if (duelAndVersus == null) {
+			interaction.respondError(tag, "Duel with $opponent not found")
+		} else {
+			duelAndVersus.second.edit {
+				embed {
+					author {
+						icon = settings.icons.duelEmbed
+						name = "VERSUS"
+					}
+					description = "Versus ended"
+					image = duelAndVersus.first.footerImage
+					color = Color(255, 0, 0)
+				}
+			}
+			interaction.respondPublic {
+				content = "Versus ended"
+			}
+		}
+	}
 
 	suspend fun duel(interaction: ChatInputCommandInteraction) {
 		val tag = MarkerFactory.getMarker("Duels#duel")
@@ -160,5 +189,6 @@ class Duels {
 			}
 		}.toString()
 		image = duel.footerImage
+		color = Color(255, 0, 0)
 	}
 }

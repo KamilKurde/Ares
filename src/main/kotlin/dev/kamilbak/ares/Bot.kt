@@ -57,6 +57,7 @@ class Bot(private val guildId: Snowflake) {
 		val invoker = command.interaction.command
 		logger.info(MarkerFactory.getMarker("Bot#onCommand"), "Parsing a ${invoker.rootName} command")
 		when {
+			invoker.rootName == "contra" -> duels.cancel(command.interaction)
 			invoker.rootName == "duel" -> duels.duel(command.interaction)
 			invoker.rootName == "versus" -> duels.versus(command.interaction)
 			invoker.rootName == "terminal" -> terminals.create(command.interaction)
@@ -125,11 +126,17 @@ class Bot(private val guildId: Snowflake) {
 			}
 		}
 
+		val contraCommand = registerCommand("contra", "Cancels a duel") {
+			contraCommandOptions(emptyList())
+		}
 		val duelCommand = registerCommand("duel", "Partakes in a duel") {
 			duelCommandOptions(emptyList())
 		}
 
 		duels.registerOnDuelsChange {
+			contraCommand.edit {
+				contraCommandOptions(it)
+			}
 			duelCommand.edit {
 				duelCommandOptions(it)
 			}
@@ -276,6 +283,13 @@ class Bot(private val guildId: Snowflake) {
 				required = true
 				setAllowedChoices(targets)
 			}
+		}
+	}
+
+	private fun RootInputChatBuilder.contraCommandOptions(targets: List<String>) {
+		string("opponent", "Name of the opponent") {
+			required = true
+			setAllowedChoices(targets)
 		}
 	}
 
